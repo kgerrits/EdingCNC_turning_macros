@@ -405,17 +405,30 @@ sub change_tool
 			
 				modbus s1 f3 a2 n1 u5020 ;; poll confirmed tool to variable ....
 				
-				if [#5020 == [#5011 mod 8]];; toolchanger confirms tools 1-8, so take 5011 modulo 8 for check condition
+				
+				if [[#5011 mod 8] == 0]
+					; this is when requested tool is integer multiple of 8 (8 mod 8 = 0)
+					if [#5020 == [#5020 + [#5011 mod 8]]];; 
 					#5015 = 1 ;; confirmed tool equals requested, indicate succesfull toolchange
+					endif
+				
+				else
+					; this is for all tools not 0 and not integer multiple of 8
+					if [#5020 == [#5011 mod 8]];; toolchanger confirms tools 1-7, so take 5011 modulo 8 for check condition
+					#5015 = 1 ;; confirmed tool equals requested, indicate succesfull toolchange
+					endif
+					
 				endif
+				
+				
 			
 				G4 P0.1 ;; wait 0.1 seconds
 				#5021 = [#5021 + 1] ;; increment timeout counter
 			
-				;if [#5021 >= 60] ;; timeout occured, raise error (timeout set to 6 seconds)
-					;errmsg "Toolchange failed, timeout occured!"
+				if [#5021 >= 60] ;; timeout occured, raise error (timeout set to 6 seconds)
+					errmsg "Toolchange failed, timeout occured!"
 					; BUG: happens when loading program
-				;endif
+				endif
 			
 			endwhile
 			
