@@ -11,24 +11,31 @@
 
 ;;[5001] = pos x --> work position 
 
-	dlgmsg "set tool X-offset" "D" 1200
+	dlgmsg "Set tool X-offset. Enter measured diameter:" "D" 1200
 
-    if [#5398 == -1]
+    if [#5398 == -1] ;; dialog canceled
 		m30
 	endif
 	
-	;; calculate offset
-	#1201 = [#5001 - #1200]
-	msg "calculated offset = "#1201" "
+	if [#5008 > 1]	
+		;; calculate offset
+		#1201 = [#5001 - #1200] ;; #5001 = position x in work coordinates; #1200 = diameter from dialog
+		msg "calculated offset = "#1201" "
+		
+		;; write offset to correct tool
+		#1202 = [#5012 + #1201] ;; new offset for current tool | #5012 = actual tool X offset
+		#[5600 + #5008] = #1202 ;; write offset | #56xx --> tool nr. xx X-offset
 	
+		msg "X-offset tool "#5008" = "#1202" mm"
 	
-	;; write offset to correct tool
-	#1202 = [#5012 + #1201] ;; new offset for current tool
-	
-	#[5600 + #5008] = #1202
-	
-	msg "X-offset tool "#5008" = "#1202" mm"
+	else ;; current tool = tool 1: reference tool
+		;; do not adjust offset, but set work offset to measured/desired value
+		
+		G92 X[#1200]
+		
+	endif
 	
 	m30
 
+;; endsub
 
