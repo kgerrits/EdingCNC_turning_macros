@@ -304,7 +304,9 @@ Sub home_toolchanger
 	#725 = 0 ;; use #725 to indicate succesfull homing
 	
 	;; check if homing is required
-	modbus s1 f2 a23 n1 u723 ;; request homing status from toolchanger and store in variable 723
+	if [[#5380==0] and [#5397==0]] ;do this only when not simulating and not rendering
+		modbus s1 f2 a23 n1 u723 ;; request homing status from toolchanger and store in variable 723
+	
 	
 	if [#723 == 0]
 		;; write a 1 to address 23, this is the home command for the toolchanger 
@@ -321,12 +323,18 @@ Sub home_toolchanger
 		
 		endwhile
 		
-		#725 = 1 ;; set homeing succesfull flag
+			#725 = 1 ;; set homeing succesfull flag
 		
+		else
+			msg "Toolchanger homing requirement already satisfied"
+			#725 = 1
+		endif
+	
 	else
-		msg "Toolchanger homing requirement already satisfied"
-		#725 = 1
-    endif
+	
+	#725 = 1
+	
+	endif
 	
 	if [#725 == 1]
 		#5011 = 1 ;; set tool during toolchange to 1, this is home position of toolchanger
@@ -392,52 +400,60 @@ sub change_tool
 	
     ;Use #5015 to indicate succesfull toolchange
     #5015 = 0 ; Tool change not performed
-
-    ; check active tool and exit sub
-    If [ [#5011] <> [#5008] ]
-        if [[#5011] > 80 ]
-            errmsg "Please select a tool in range from 1 to 80." 
-        else
-            ;; command a toolchange
-			modbus s1 f16 a2 n1 u5011 ;; TODO: check write single register, seemed to contain a bug.
-			
-			while [#5015 == 0]
-			
-				modbus s1 f3 a2 n1 u5020 ;; poll confirmed tool to variable ....
-				
-				
-				if [[#5011 mod 8] == 0]
-					; this is when requested tool is integer multiple of 8 (8 mod 8 = 0)
-					if [#5020 == [#5020 + [#5011 mod 8]]];; 
-					#5015 = 1 ;; confirmed tool equals requested, indicate succesfull toolchange
-					endif
-				
-				else
-					; this is for all tools not 0 and not integer multiple of 8
-					if [#5020 == [#5011 mod 8]];; toolchanger confirms tools 1-7, so take 5011 modulo 8 for check condition
-					#5015 = 1 ;; confirmed tool equals requested, indicate succesfull toolchange
-					endif
-					
-				endif
-				
-				
-			
-				G4 P0.1 ;; wait 0.1 seconds
-				#5021 = [#5021 + 1] ;; increment timeout counter
-			
-				if [#5021 >= 60] ;; timeout occured, raise error (timeout set to 6 seconds)
-					errmsg "Toolchange failed, timeout occured!"
-					; BUG: happens when loading program
-				endif
-			
-			endwhile
-			
-        endif
-    else
-        msg "Tool already active"
-        #5015 = 1 ;indicate tool change performed
-    endif    
 	
+	; Only perform actual toolchange when not rendering or simulating
+	if [[#5380==0] and [#5397==0]] ;do this only when not simulating and not rendering
+
+		; check active tool and exit sub
+		If [ [#5011] <> [#5008] ]
+			if [[#5011] > 80 ]
+				errmsg "Please select a tool in range from 1 to 80." 
+			else
+				;; command a toolchange
+				modbus s1 f16 a2 n1 u5011 ;; TODO: check write single register, seemed to contain a bug.
+			
+				while [#5015 == 0]
+			
+					modbus s1 f3 a2 n1 u5020 ;; poll confirmed tool to variable ....
+				
+				
+					if [[#5011 mod 8] == 0]
+						; this is when requested tool is integer multiple of 8 (8 mod 8 = 0)
+						if [#5020 == [#5020 + [#5011 mod 8]]];; 
+						#5015 = 1 ;; confirmed tool equals requested, indicate succesfull toolchange
+						endif
+				
+					else
+						; this is for all tools not 0 and not integer multiple of 8
+						if [#5020 == [#5011 mod 8]];; toolchanger confirms tools 1-7, so take 5011 modulo 8 for check condition
+						#5015 = 1 ;; confirmed tool equals requested, indicate succesfull toolchange
+						endif
+					
+					endif
+				
+				
+			
+					G4 P0.1 ;; wait 0.1 seconds
+					#5021 = [#5021 + 1] ;; increment timeout counter
+			
+					if [#5021 >= 60] ;; timeout occured, raise error (timeout set to 6 seconds)
+						errmsg "Toolchange failed, timeout occured!"
+					endif
+			
+				endwhile
+			
+			endif
+			
+			
+		else
+			msg "Tool already active"
+			#5015 = 1 ;indicate tool change performed
+		endif
+	
+	else
+		;; simulation or rendering: always succesfull toolchange
+		#5015 = 1 ;indicate tool change performed
+    endif    
 	
                 
     If [[#5015] == 1]   
