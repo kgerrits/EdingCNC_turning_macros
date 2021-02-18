@@ -211,28 +211,24 @@ sub set_tool_offset_X
 		M30
 	endif
 	
-	if [#5008 > 1]	
-	
-		;; make sure tool offset is active
-		G43
-		
-		;; calculate offset
-		#1201 = [#5001 - #1200] ;; #5001 = position X in work coordinates; #1200 = diameter from dialog
-		msg "calculated offset = "#1201" "
-		
-		;; write offset to correct tool
-		#1202 = [#5012 + #1201] ;; new offset for current tool | #5012 = actual tool X offset
-		#[5600 + #5008] = #1202 ;; write offset | #56xx --> tool nr. xx X-offset
-	
-		msg "X-offset tool "#5008" = "#1202" mm"
-	
-	else ;; current tool = tool 1: reference tool
-		;; do not adjust offset, but set work offset to measured/desired value
-		
-		G92 X[#1200]
-		
+	;; sanity check if diameter > 0
+	if [#1200 < 0] ;; 
+		warnmsg "entered diameter < 0"
 	endif
+		
+	;; make sure tool offset is active
+	G43
+		
+	;; calculate offset
+	#1201 = [#5001 - #1200] ;; #5001 = position X in work coordinates; #1200 = diameter from dialog
+	msg "calculated offset = "#1201" "
+		
+	;; write offset to correct tool
+	#1202 = [#5012 + #1201] ;; new offset for current tool | #5012 = actual tool X offset
+	#[5600 + #5008] = #1202 ;; write offset | #56xx --> tool nr. xx X-offset
 	
+	msg "X-offset tool "#5008" = "#1202" mm"
+
 endsub
 
 sub set_tool_offset_Z
@@ -243,27 +239,18 @@ sub set_tool_offset_Z
 		M30
 	endif
 	
-	if [#5008 > 1]	
+	;; make sure tool offset is active
+	G43
+		
+	;; calculate offset
+	#1301 = [#5003 - #1300] ;; #5003 = position Z in work coordinates; #1300 = offset from dialog
+	msg "calculated offset = "#1301" "
+		
+	;; write offset to correct tool
+	#1302 = [#5010 + #1301] ;; new offset for current tool | #5010 = actual tool Z offset
+	#[5400 + #5008] = #1302 ;; write offset | #54xx --> tool nr. xx Z-offset
 	
-		;; make sure tool offset is active
-		G43
-		
-		;; calculate offset
-		#1301 = [#5003 - #1300] ;; #5003 = position Z in work coordinates; #1300 = offset from dialog
-		msg "calculated offset = "#1301" "
-		
-		;; write offset to correct tool
-		#1302 = [#5010 + #1301] ;; new offset for current tool | #5010 = actual tool Z offset
-		#[5400 + #5008] = #1302 ;; write offset | #54xx --> tool nr. xx Z-offset
-	
-		msg "Z-offset tool "#5008" = "#1302" mm"
-	
-	else ;; current tool = tool 1: reference tool
-		;; do not adjust offset, but set work offset to measured/desired value
-		
-		G92 Z[#1300]
-		
-	endif
+	msg "Z-offset tool "#5008" = "#1302" mm"
 
 endsub
 
