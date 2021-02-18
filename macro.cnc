@@ -217,7 +217,7 @@ sub set_tool_offset_X
 		G43
 		
 		;; calculate offset
-		#1201 = [#5001 - #1200] ;; #5001 = position Z in work coordinates; #1200 = diameter from dialog
+		#1201 = [#5001 - #1200] ;; #5001 = position X in work coordinates; #1200 = diameter from dialog
 		msg "calculated offset = "#1201" "
 		
 		;; write offset to correct tool
@@ -267,6 +267,132 @@ sub set_tool_offset_Z
 
 endsub
 
+sub tool_plus_one
+
+	if [#5008 < 99]
+		;; advance tool with 1 position
+		M6 T[#5008 + 1] 
+	endif
+
+endsub
+
+sub tool_minus_one
+
+	if [#5008 > 1]
+		;; move back tool with 1 position
+		M6 T[#5008 - 1] 
+	endif
+endsub
+
+sub simple_turning
+	;; simple outside diameter turning macro
+	
+	;; default values for dialog window
+	#1400 = 0 ;; Z1
+	#1401 = -5 ;; Z2
+	#1402 = 20 ;; diameter A
+	#1403 = 10 ;; diameter B
+	#1404 = 0.75 ;; Depth of cut
+	#1405 = 0.4 ;; Finish amount
+	#1406 = 150 ;; Vc, cutting speed [m/s]
+	#1407 = 400 ;; F, cutting feed [mm/min]
+	#1408 = 2 ;; Z clearance
+	#1409 = 0.5;; retract amount
+	;; dialog with picture
+	
+	dlgmsg "simple_turning" "Z1" 1400 "Z2" 1401 "diameter A" 1402 "diameter B" 1403 "DOC" 1404 "finish amount" 1405 "Vc [m/min]" 1406 "F [mm/min]" 1407 "Z clearance" 1408 "retract amount" 1409
+	
+	if [#5398 == -1] ;; dialog canceled
+		M30
+	endif
+	
+	;; sanity checks
+	;; -------------------------------------------------------------
+	;; TODO: 
+	;; - Z & diameter add allowance to checks
+	;; - cutting speed not 0
+	;; - Z clearance and retract amount >= 0
+	;; finish amount >= 0 & <= DOC
+	
+	if [#1400 <= #1401] ;; Z1 larger or equal than Z2
+		errmsg "Z2 must be smaller than Z1."
+	endif
+	
+	if [#1403 >= #1402] ;; diameter B larger or equal than diameter A
+		errmsg "Diameter B must be smaller than diameter A."
+	endif
+	
+	if [#1404 <= 0] ;; DOC 0 or negative
+		errmsg "DOC cannot be negative or equal to 0"
+	endif
+	
+	;; turning routine
+	;; -------------------------------------------------------------
+	M53 ;; feed hold. Macro does not start immediately, toolpath can be checked in window
+
+	;; goto safety position
+	G0 X#1402 Z[#1400 + #1408]
+	
+	;; enable spindle
+	G96 S#1406
+	;; check sign of Vc for spindle directions
+	if [#1406 > 0] ;; turn CW
+		M3
+	else ;; turn CCW
+		M4
+	endif
+	
+	;; roughing
+	#1410 = 0 ;; roughing complete flag
+	#1411 = [#1402 - #1404] ;; desired cutting depth
+	#1412 = #1402 ;; last cut diameter
+	while [#1410 < 1]
+		
+		if [#1411 > [#1403+#1405]] ;; perform cut with full DOC if resulting diameter > final + finish allowance
+			msg "next roughing pass X:"#1411
+			G0 X#1411 ;; x down
+			G1 Z[#1401 + #1405] F#1407 ;; cut
+			G1 X[#5001 + #1409] ;; retract X
+			G0 Z[#1400 + #1408] ;; rapid Z to clearance
+			#1412 = #1411 ;; update last cut diameter
+			msg "roughing pass at X:"#1412
+			#1411 = [#1412 - #1404] ;; calculate new desired diameter to cut
+			
+		endif
+
+		if [#1411 <= [#1403+#1405]] ;; perform cut up to finish allowance diameter
+			msg "next roughing pass X:"[#1403 + #1405]
+			G0 X[#1403 + #1405] ;; x down to final diameter + finish amount
+			G1 Z[#1401 + #1405] F#1407 ;; cut
+			G1 X[#5001 + #1409] ;; retract X
+			G0 Z[#1400 + #1408] ;; rapid Z to clearance
+			#1410 = 1 ;; roughing completed
+			msg "roughing passes completed"
+		
+		endif
+		
+		;;else
+		;;	errmsg "chosen parameters caused a roughing error"
+		;;endif
+		
+		
+	endwhile
+	
+	;; finish pass
+	msg "Finishing pass X:"#1403
+	G0 X[#1403] ;; x down to final diameter + finish amount
+	G1 Z[#1401] F#1407 ;; cut
+	G1 X[#1402 + #1409] ;; cut backface to start diameter + retract amount
+	G0 Z[#1400 + #1408] ;; rapid Z to clearance
+	msg "finish pass completed"
+	
+	;; end macro
+	M9 ;; stop cooling
+	M5 ;; stop spindle
+	G30 ;; go to safe position
+	M30 ;; end program
+endsub
+
 ;User functions, F1..F11 in user menu
 
 
@@ -281,7 +407,7 @@ Sub user_2
 Endsub
 
 Sub user_3 
-
+	gosub simple_turning
 Endsub
 
 Sub user_4
@@ -331,7 +457,11 @@ Sub user_10
 Endsub
 
 Sub user_11
-    msg "sub user_11"
+    goSub tool_plus_one
+Endsub
+
+Sub user_12
+    goSub tool_minus_one
 Endsub
 
 ;Homing per axis
@@ -460,7 +590,7 @@ sub change_tool
 	; Goto toolchange position
 	G0 ; rapid motion
 	G30 ; move to safe position
-	G1 ;Set default motion type to G1   
+	;G1 ;Set default motion type to G1   
 	
     ;Use #5015 to indicate succesfull toolchange
     #5015 = 0 ; Tool change not performed
