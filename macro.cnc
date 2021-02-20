@@ -380,6 +380,136 @@ sub simple_turning
 	M30 ;; end program
 endsub
 
+
+sub cycle_drilling
+;; simple outside diameter turning macro
+	
+	;; default values for dialog window
+	#1450 = 0 ;; Z1
+	#1451 = -5 ;; Z2
+	#1452 = 1 ;; include tip (0 = no, 1 = yes)
+	#1453 = 118 ;; tip angle
+	#1454 = 4.2 ;; drill diameter
+	#1455 = 2 ;; Z clearance
+	#1456 = 2 ;; peck depth (0 = no pecking)
+	#1457 = 0.2 ;; retract amount
+	#1458 = 0 ;; full retract (0 = no, 1 = yes)
+	#1459 = 70 ;; Vc
+	#1460 = 0.05 ;; fn [mm/rev]
+	
+
+	;; dialog with picture
+	
+	dlgmsg "drilling" "Z1" 1450 "Z2" 1451 "tip include" 1452 "tip angle" 1453 "diameter" 1454 "Z clearance" 1455 "peck depth" 1456 "retract amount" 1457 "full retract" 1458 "Vc [m/min]" 1459 "feed [mm/rev]" 1460
+	
+	if [#5398 == -1] ;; dialog canceled
+		M30
+	endif
+	
+	;; sanity checks
+	;; -------------------------------------------------------------
+	;; TODO
+	
+	
+	;; Calculate parameters
+	;; spinde speed
+	#1461 = [[#1459*1000] / [3.14159 * #1454]] ;; n = Vc*1000/pi*D
+	msg "drill RPM:" #1461
+	;; cutting speed
+	#1462 = [#1460 * #1461]
+	msg "drill feed mm/min:" #1462
+	;; full diameter Z-extension
+	#1463 = [[#1454 / 2] / TAN[#1453 / 2]]
+	msg "drill tip extension amount:" #1463 
+	
+
+	;; -------------------------------------------------------------
+	M53 ;; feed hold. Macro does not start immediately, toolpath can be checked in window
+	
+	;; move to home
+	G28
+	
+	;; move to Z clearance position
+	G0 X0
+	G0 Z#1455
+	
+	;; start spindle
+	;; limit speed to 4000 RPM
+	if [#1461 > 4000]
+		G97 S4000
+	else
+		G97 S#1461
+	endif
+
+	M4 ;; spindle CCW for drilling
+	
+	;; determine drilling cycle
+	if [#1456 == 0] ;; full depth drilling
+		msg "full depth drilling"
+		
+		if [#1452 == 0] ;; full diameter drilling --> extend Z2 with tip extension
+		
+			G1 Z[#1451-#1463] F#1462
+			G4 P0.1 ;; dwell for 0.1 to get flat bottom 
+			G91 G1 Z#1457 ;; retract with feed in incremental mode
+			G90 G0 Z#1455 ;; rapid to safe position 
+		else
+			G1 Z#1451 F#1462
+			G4 P0.1 ;; dwell for 0.1 to get flat bottom 
+			G91 G1 Z#1457 ;; retract with feed in incremental mode
+			G90 G0 Z#1455 ;; rapid to safe position 
+		endif
+		
+	endif
+	
+	if [[#1456 > 0] and [#1458 == 0]] ;; standard pecking
+		msg "standard pecking"
+		
+		if [#1452 == 0] ;; full diameter drilling --> extend Z2 with tip extension
+
+			G17 ;; switch plane --> G18 creates bug function error message in Eding CNC
+			G73 X0 Z[#1451-#1463] R#1457 Q#1456 F#1462
+			G18 ;; switch back to XZ plane
+			G0 Z#1455 ;; rapid to safe position 
+		else
+			G17 ;; switch plane --> G18 creates bug function error message in Eding CNC
+			G73 X0 Z#1451 R#1457 Q#1456 F#1462
+			G18 ;; switch back to XZ plane
+			G0 Z#1455 ;; rapid to safe position 
+		endif
+	endif
+	
+	if [[#1456 > 0] and [#1458 == 1]] ;; full retract pecking
+		msg "full retract pecking"
+		
+		if [#1452 == 0] ;; full diameter drilling --> extend Z2 with tip extension
+		
+			G17 ;; switch plane --> G18 creates bug function error message in Eding CNC
+			G83 X0 Y0 Z[#1451-#1463] R#1457 Q#1456 F#1462
+			G18 ;; switch back to XZ plane
+			G0 Z#1455 ;; rapid to safe position 
+
+		else
+			G17 ;; switch plane --> G18 creates bug function error message in Eding CNC
+			G83 X0 Y0 Z#1451 R#1457 Q#1456 F#1462
+			G18 ;; switch back to XZ plane
+			G0 Z#1455 ;; rapid to safe position 
+			
+		endif
+		
+	endif
+	
+	
+
+	M9 ;; stop cooling
+	M5 ;; stop spindle
+	;; TODO retract Z axis before calling home position
+	G30 ;; go to safe position
+	M30 ;; end program
+	
+
+endsub
+
 ;User functions, F1..F11 in user menu
 
 
@@ -398,25 +528,7 @@ Sub user_3
 Endsub
 
 Sub user_4
-    #1 = 0
-    #2 = 0
-    #3 = 0
-    #4 = 0
-    #5 = 0
-    #6 = 0
-    #7 = 0
-    #8 = 0
-    #9 = 0
-    #10 = 0
-    #11 = 0
-    #12 = 0
-    ;dlgmsg will popup a dialog with picture edingcnc.png from c:\program files (x86)\cnc4.01\dialogPictures directory
-        dlgmsg "edingcnc" "A" 1 "B" 2 "C" 3 "D" 4 "E" 5 "F" 6 "G" 7 "H" 8 "I" 9 "J" 10 "K" 11 "L" 12 "M" 13 "N" 14 "O" 15
-    if [#5398 == 1]
-        msg "OK #1="#1 "#2="#2 "#3="#3 "#4="#4 "#5="#5 "#6="#6 "#7="#7 "#8="#8 "#9="#9 "#10="#10 "#11="#11 "#12="#12 "#13="#13 "#14="#14 "#15="#15
-    else
-        msg "CANCEL #1="#1 "#2="#2 "#3="#3 "#4="#4 "#5="#5 "#6="#6 "#7="#7 "#8="#8 "#9="#9 "#10="#10 "#11="#11 "#12="#12 "#13="#13 "#14="#14 "#15="#15
-    endif
+	gosub cycle_drilling
 Endsub
 
 Sub user_5
