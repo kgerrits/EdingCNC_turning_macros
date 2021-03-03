@@ -336,6 +336,11 @@ Sub home_c
     home c
 Endsub
 
+Sub reset_alarm_toolchanger
+	;; write a 1 to address 22, this is the reset alarm command for the toolchanger
+	modbus s1 f5 a22 v1
+endSub
+
 Sub home_toolchanger
 	#724 = 0 ;; timeout counter
 	#725 = 0 ;; use #725 to indicate succesfull homing
@@ -451,13 +456,22 @@ sub change_tool
 			
 				while [#5015 == 0]
 			
-					modbus s1 f3 a2 n1 u5020 ;; poll confirmed tool to variable ....
+					modbus s1 f3 a2 n1 u5020 ;; poll confirmed tool to variable #5020
 				
 				
 					if [[#5011 mod 8] == 0]
 						; this is when requested tool is integer multiple of 8 (8 mod 8 = 0)
-						if [#5020 == [#5020 + [#5011 mod 8]]];; 
-						#5015 = 1 ;; confirmed tool equals requested, indicate succesfull toolchange
+						
+						if [#5011 == 8]
+							;; if requested tool equals tool 8
+							if [#5020 == #5011];; 
+							#5015 = 1 ;; confirmed tool equals requested, indicate succesfull toolchange
+							endif
+						else
+							;; requested tool is multiple of 8
+							if [#5020 == [8 mod #5011]];; 
+							#5015 = 1 ;; confirmed tool equals requested, indicate succesfull toolchange
+							endif
 						endif
 				
 					else

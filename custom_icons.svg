@@ -420,9 +420,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.7"
-     inkscape:cx="626.52565"
-     inkscape:cy="422.03931"
+     inkscape:zoom="0.98994949"
+     inkscape:cx="606.99602"
+     inkscape:cy="414.24691"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -1717,15 +1717,15 @@
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
-       x="54.77544"
-       y="183.73013"
+       x="52.022087"
+       y="181.55771"
        id="text7254-9-1"
        inkscape:export-filename="N:\Koen\Projecten\Emcoturn 120\edingCNC\dialog_pictures\simple_turning.png"
        inkscape:export-xdpi="300"
        inkscape:export-ydpi="300"><tspan
          sodipodi:role="line"
-         x="54.77544"
-         y="183.73013"
+         x="52.022087"
+         y="181.55771"
          style="font-size:2.82222223px;fill:#ffffff;stroke-width:0.26458332"
          id="tspan1704">V<tspan
    style="font-size:2.82222223px;baseline-shift:sub"
@@ -1733,18 +1733,32 @@
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
-       x="54.77544"
-       y="187.47055"
+       x="52.008247"
+       y="185.12465"
        id="text7254-9-1-2"
        inkscape:export-filename="N:\Koen\Projecten\Emcoturn 120\edingCNC\dialog_pictures\simple_turning.png"
        inkscape:export-xdpi="300"
        inkscape:export-ydpi="300"><tspan
          sodipodi:role="line"
-         x="54.77544"
-         y="187.47055"
+         x="52.008247"
+         y="185.12465"
          style="font-size:2.82222223px;fill:#ffffff;stroke-width:0.26458332"
          id="tspan1704-3">V<tspan
    style="font-size:2.82222223px;baseline-shift:sub;stroke-width:0.26458332"
    id="tspan1708-6">c</tspan> &lt; 0: CCW</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="51.806931"
+       y="188.97868"
+       id="text7254-9-1-2-6"
+       inkscape:export-filename="N:\Koen\Projecten\Emcoturn 120\edingCNC\dialog_pictures\simple_turning.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300"><tspan
+         sodipodi:role="line"
+         x="51.806931"
+         y="188.97868"
+         style="font-size:2.82222223px;fill:#ffffff;stroke-width:0.26458332"
+         id="tspan1704-3-9">max RPM: 0 = machine limit</tspan></text>
   </g>
 </svg>

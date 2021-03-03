@@ -128,13 +128,14 @@ sub cycle_simple_turning
 	#1403 = 10 ;; diameter B
 	#1404 = 0.75 ;; Depth of cut
 	#1405 = 0.4 ;; Finish amount
-	#1406 = 150 ;; Vc, cutting speed [m/s]
-	#1407 = 400 ;; F, cutting feed [mm/min]
+	#1406 = 150 ;; Vc, cutting speed [m/min]
+	#1407 = 0.1 ;; F, feed per rev [mm/rev]
 	#1408 = 2 ;; Z clearance
-	#1409 = 0.5;; retract amount
+	#1409 = 0.5 ;; retract amount
+	#1413 = 3000 ;; max spindle speed
 	;; dialog with picture
 	
-	dlgmsg "simple_turning" "Z1" 1400 "Z2" 1401 "diameter A" 1402 "diameter B" 1403 "DOC" 1404 "finish amount" 1405 "Vc [m/min]" 1406 "F [mm/min]" 1407 "Z clearance" 1408 "retract amount" 1409
+	dlgmsg "simple_turning" "Z1" 1400 "Z2" 1401 "diameter A" 1402 "diameter B" 1403 "DOC" 1404 "finish amount" 1405 "Vc [m/min]" 1406 "F [mm/rev]" 1407 "Z clearance" 1408 "retract amount" 1409 "max spindle speed [rpm]" 1413
 	
 	if [#5398 == -1] ;; dialog canceled
 		M30
@@ -144,7 +145,6 @@ sub cycle_simple_turning
 	;; -------------------------------------------------------------
 	;; TODO: 
 	;; - Z & diameter add allowance to checks
-	;; - cutting speed not 0
 	;; - Z clearance and retract amount >= 0
 	;; finish amount >= 0 & <= DOC
 	;; TODO: check start positions of axes
@@ -169,7 +169,12 @@ sub cycle_simple_turning
 	G0 X#1402 Z[#1400 + #1408]
 	
 	;; enable spindle
-	G96 S#1406
+	if [#1413 == 0]
+		G96 S#1406 ;; max spindle speed = max spindle speed of machine
+	else
+		G96 S#1406 D#1413
+	endif
+	
 	;; check sign of Vc for spindle directions
 	if [#1406 > 0] ;; turn CW
 		M3
@@ -186,7 +191,7 @@ sub cycle_simple_turning
 		if [#1411 > [#1403+#1405]] ;; perform cut with full DOC if resulting diameter > final + finish allowance
 			msg "next roughing pass X:"#1411
 			G0 X#1411 ;; x down
-			G1 Z[#1401 + #1405] F#1407 ;; cut
+			G1 Z[#1401 + #1405] F[#5070 * 60 * #1407] ;; cut and calculate feedrate in mm/min --> workaround for edingCNC "bug" where feedoverride does not work icm with G95 and G96 active
 			G1 X[#5001 + #1409] ;; retract X
 			G0 Z[#1400 + #1408] ;; rapid Z to clearance
 			#1412 = #1411 ;; update last cut diameter
@@ -198,7 +203,7 @@ sub cycle_simple_turning
 		if [#1411 <= [#1403+#1405]] ;; perform cut up to finish allowance diameter
 			msg "next roughing pass X:"[#1403 + #1405]
 			G0 X[#1403 + #1405] ;; x down to final diameter + finish amount
-			G1 Z[#1401 + #1405] F#1407 ;; cut
+			G1 Z[#1401 + #1405] F[#5070 * 60 * #1407] ;; cut
 			G1 X[#5001 + #1409] ;; retract X
 			G0 Z[#1400 + #1408] ;; rapid Z to clearance
 			#1410 = 1 ;; roughing completed
@@ -216,7 +221,7 @@ sub cycle_simple_turning
 	;; finish pass
 	msg "Finishing pass X:"#1403
 	G0 X[#1403] ;; x down to final diameter + finish amount
-	G1 Z[#1401] F#1407 ;; cut
+	G1 Z[#1401] F[#5070 * 60 * #1407] ;; cut
 	G1 X[#1402 + #1409] ;; cut backface to start diameter + retract amount
 	G0 Z[#1400 + #1408] ;; rapid Z to clearance
 	msg "finish pass completed"
