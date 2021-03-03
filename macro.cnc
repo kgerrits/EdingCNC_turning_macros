@@ -280,7 +280,7 @@ Sub user_5
 Endsub
 
 Sub user_6
-    msg "sub user_6"
+    gosub cycle_external_threading
 Endsub
 
 Sub user_7
