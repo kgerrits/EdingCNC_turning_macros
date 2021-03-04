@@ -284,7 +284,7 @@ Sub user_6
 Endsub
 
 Sub user_7
-    msg "sub user_7"
+    gosub cycle_internal_turning
 Endsub
 
 Sub user_8
