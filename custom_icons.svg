@@ -543,6 +543,36 @@
          d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
          transform="matrix(1.1,0,0,1.1,1.1,0)" />
     </marker>
+    <marker
+       inkscape:stockid="Arrow2Lstart"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker1576-0-55-2"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         inkscape:connector-curvature="0"
+         id="path1140-9-1-7"
+         style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:#ffffff;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="matrix(1.1,0,0,1.1,1.1,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Lstart"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker1576-2-3"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         inkscape:connector-curvature="0"
+         id="path1140-94-8"
+         style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:#ffffff;stroke-width:0.625;stroke-linejoin:round;stroke-opacity:1"
+         d="M 8.7185878,4.0337352 -2.2072895,0.01601326 8.7185884,-4.0017078 c -1.7454984,2.3720609 -1.7354408,5.6174519 -6e-7,8.035443 z"
+         transform="matrix(1.1,0,0,1.1,1.1,0)" />
+    </marker>
   </defs>
   <sodipodi:namedview
      id="base"
@@ -551,9 +581,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.979899"
-     inkscape:cx="1741.9902"
-     inkscape:cy="471.36551"
+     inkscape:zoom="1.4"
+     inkscape:cx="2003.8441"
+     inkscape:cy="178.86645"
      inkscape:document-units="mm"
      inkscape:current-layer="g1453-61"
      showgrid="false"
@@ -2653,6 +2683,249 @@
          inkscape:export-filename="N:\Koen\Projecten\Emcoturn 120\edingCNC\icons\icon_ID_turning_cycle.png"
          inkscape:export-xdpi="37.799999"
          inkscape:export-ydpi="37.799999" />
+      <rect
+         style="fill:#214796;fill-opacity:1;stroke:none;stroke-width:0.59140635;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         id="rect7242-6-3"
+         width="112.24326"
+         height="65.698654"
+         x="49.407501"
+         y="198.53441"
+         inkscape:export-filename="N:\Koen\Projecten\Emcoturn 120\edingCNC\dialog_pictures\dialog_simple_boring.png"
+         inkscape:export-xdpi="300"
+         inkscape:export-ydpi="300" />
+      <path
+         style="fill:none;stroke:#ffffff;stroke-width:0.46298236;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1.85192931, 0.92596463, 0.46298233, 0.92596463;stroke-dashoffset:0;stroke-opacity:1"
+         d="M 78.685998,246.6507 H 124.51707"
+         id="path7248-4-5"
+         inkscape:connector-curvature="0"
+         inkscape:export-filename="N:\Koen\Projecten\Emcoturn 120\edingCNC\dialog_pictures\dialog_simple_boring.png"
+         inkscape:export-xdpi="300"
+         inkscape:export-ydpi="300" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         x="99.390816"
+         y="212.1602"
+         id="text7254-0-9-8"
+         inkscape:export-filename="N:\Koen\Projecten\Emcoturn 120\edingCNC\dialog_pictures\dialog_simple_boring.png"
+         inkscape:export-xdpi="300"
+         inkscape:export-ydpi="300"><tspan
+           sodipodi:role="line"
+           id="tspan7252-8-1-3"
+           x="99.390816"
+           y="212.1602"
+           style="font-size:4.23333311px;fill:#ffffff;stroke-width:0.26458332">Z<tspan
+   style="font-size:64.99999762%;baseline-shift:sub"
+   id="tspan1635">start</tspan></tspan></text>
+      <path
+         style="fill:none;stroke:#ffffff;stroke-width:0.09999999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 100.7666,221.065 v -7.11273"
+         id="path7274-2-8"
+         inkscape:connector-curvature="0"
+         inkscape:export-filename="N:\Koen\Projecten\Emcoturn 120\edingCNC\dialog_pictures\dialog_simple_boring.png"
+         inkscape:export-xdpi="300"
+         inkscape:export-ydpi="300" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         x="122.55695"
+         y="229.15131"
+         id="text7254-9-7-2"
+         inkscape:export-filename="N:\Koen\Projecten\Emcoturn 120\edingCNC\dialog_pictures\dialog_simple_boring.png"
+         inkscape:export-xdpi="300"
+         inkscape:export-ydpi="300"><tspan
+           sodipodi:role="line"
+           id="tspan7252-4-64-9"
+           x="122.55695"
+           y="229.15131"
+           style="font-size:4.23333454px;fill:#ffffff;stroke-width:0.26458332">øA</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         x="112.43114"
+         y="241.86751"
+         id="text7254-9-5-6-7"
+         inkscape:export-filename="N:\Koen\Projecten\Emcoturn 120\edingCNC\dialog_pictures\dialog_simple_boring.png"
+         inkscape:export-xdpi="300"
+         inkscape:export-ydpi="300"><tspan
+           sodipodi:role="line"
+           id="tspan7252-4-2-4-9"
+           x="112.43114"
+           y="241.86751"
+           style="font-size:4.23333454px;fill:#ffffff;stroke-width:0.26458332">øB</tspan></text>
+      <path
+         style="fill:none;stroke:#ffffff;stroke-width:0.2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#marker1576-2-3)"
+         d="M 121.17937,222.45407 V 246.6507"
+         id="path1569-4-3"
+         inkscape:connector-curvature="0"
+         inkscape:export-filename="N:\Koen\Projecten\Emcoturn 120\edingCNC\dialog_pictures\dialog_simple_boring.png"
+         inkscape:export-xdpi="300"
+         inkscape:export-ydpi="300" />
+      <path
+         style="fill:none;stroke:#ffffff;stroke-width:0.20000002;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#marker1576-0-55-2)"
+         d="m 111.58305,234.39708 v 12.25361"
+         id="path1569-9-55-0"
+         inkscape:connector-curvature="0"
+         inkscape:export-filename="N:\Koen\Projecten\Emcoturn 120\edingCNC\dialog_pictures\dialog_simple_boring.png"
+         inkscape:export-xdpi="300"
+         inkscape:export-ydpi="300" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         x="51.401978"
+         y="204.29128"
+         id="text1159-2-7-1"
+         inkscape:export-filename="N:\Koen\Projecten\Emcoturn 120\edingCNC\dialog_pictures\dialog_simple_boring.png"
+         inkscape:export-xdpi="300"
+         inkscape:export-ydpi="300"><tspan
+           sodipodi:role="line"
+           id="tspan1157-6-4-6"
+           x="51.401978"
+           y="204.29128"
+           style="font-size:4.23333311px;fill:#ffffff;stroke-width:0.26458332">Parting-off</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         x="53.603394"
+         y="257.65076"
+         id="text7254-9-1-2-6-3-2"
+         inkscape:export-filename="N:\Koen\Projecten\Emcoturn 120\edingCNC\dialog_pictures\dialog_simple_boring.png"
+         inkscape:export-xdpi="300"
+         inkscape:export-ydpi="300"><tspan
+           sodipodi:role="line"
+           x="53.603394"
+           y="257.65076"
+           style="font-size:2.82222223px;fill:#ffffff;stroke-width:0.26458332"
+           id="tspan1704-3-9-5-3">max RPM: 0 = machine limit</tspan></text>
+      <image
+         inkscape:export-ydpi="37.799999"
+         inkscape:export-xdpi="37.799999"
+         inkscape:export-filename="N:\Koen\Projecten\Emcoturn 120\edingCNC\icons\icon_ID_turning_cycle.png"
+         y="221.99055"
+         x="1.2323922"
+         id="image4526-1-6-7-4-1"
+         xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAABHNCSVQICAgIfAhkiAAAA25JREFU aIHVWktu2zAUnEdS/iRdFGiBrLPstpfIXXKg3CXr7gt0k0XQ1m3TpM1PdRxZsiXb7MIiRUqyLMuS LQ8Cw6RJaoac9/gEhADI07MLHCIGl+eg07MLuW8i24Dtm8C2ELt9nDps0j1kN0Fxg+I+KQEJCbnC JzUJMFcn3SYQ4j+AKG4b5MmelfTbY6bhfOWTaxJAuW0Zf0gADlc7u0oAZfoU+t2EZjCdWb9lBAjR TFioMxIsK0TpVz2UpyLGm6MOPD/UbUsAIwJnqyfXgYUyc46pe531hkjbyZrx8cMJrr4/bUGvOrod UbjzCkd9hkmY2MgScO/64Lz5zNpxuPZ6kfdNKF7BJLL6LQGPrg/HSQSoxRmvz1Zdh8drL+OCiNaS N8GYvcF2DDDSStWavEbyADBfLPT3nraNHQ+C85yZEkSE2WxhjzUbjBGESnegxu0kBNOnbIJrDjEo sVmakyWAMwJnDESAaIh8t8P1BZcHbqRZHSdEsd+QyZKZE3AEa2znl2lSlso2QJJppf6StbR9ApzQ 6zZXHin/97p5Hk/gcJYEtmEfAlkpFMi5yJqyTprgOgjBAWmcFi2tVGihk/fH9bHMQdcRhSlTcGaU FcbOG7FQGMRN7v7ypi0/XkLi190IC7kspVUcTIqKuedhgHdv+/rYCEq9kRGQFFs6OaiMIe3xak40 W8APIhz3Hf2sL9cPCKN5Jq9viswJOIIbxGF7MHXtm2PU5koAr+MQI2+K0XgKbxxhGtm7Vicy94AT l9OUSzhby0sJ+JMIz8MA7miCV2+K+cK+WfOss+oNaysBjDEII4WRlcIQv1UtS+KX1ykeXB+Prp9J bUXk6yKukLkHHMEs4kBCfhyEuL338OfRKyStYJKvm7hCRsCyPkl2X0qJe9fHz7sXPA+D0gvvgjyQ iYHEQlICv/+O8PVmaL3ClcGuyAMraqHbBw9X3542Jg7sljyQEuD5IT59vsHTv/JWMbFr8kBKwPUP t/JCVclvcjvnrV1L6ZkmsSmpTZ9liti6+GmSbBlsJWBf5M3nVhawj4DNQyUBbSEPVBDQJvLAhgLa Rh7YQEAbyQMlBbSVPFBCQJvJA2sEtJ08UCDgEMgDKwQcCnkgR8AhkQdS1eghkC9VTlchvy/BloC2 7noRDv5/Jdjg8nzfHCpjcHmO/8hjDKi6s2ddAAAAAElFTkSuQmCC "
+         preserveAspectRatio="none"
+         height="32.253967"
+         width="32.253967" />
+      <rect
+         y="-247.60172"
+         x="4.4538279"
+         height="19.77795"
+         width="7.4167295"
+         id="rect1311-0-9"
+         style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+         transform="scale(1,-1)"
+         inkscape:export-filename="N:\Koen\Projecten\Emcoturn 120\edingCNC\icons\icon_ID_turning_cycle.png"
+         inkscape:export-xdpi="37.799999"
+         inkscape:export-ydpi="37.799999" />
+      <rect
+         y="-234.90642"
+         x="11.870545"
+         height="7.0826416"
+         width="12.027128"
+         id="rect1311-9-0-6"
+         style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+         transform="scale(1,-1)"
+         inkscape:export-filename="N:\Koen\Projecten\Emcoturn 120\edingCNC\icons\icon_ID_turning_cycle.png"
+         inkscape:export-xdpi="37.799999"
+         inkscape:export-ydpi="37.799999" />
+      <path
+         style="fill:none;stroke:#ffffff;stroke-width:0.69999999;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 20.544644,236.32215 c 0.27622,0.0222 4.48893,0.3628 4.48893,0.3628"
+         id="path1437-6"
+         inkscape:connector-curvature="0"
+         inkscape:export-filename="N:\Koen\Projecten\Emcoturn 120\edingCNC\icons\icon_ID_turning_cycle.png"
+         inkscape:export-xdpi="37.799999"
+         inkscape:export-ydpi="37.799999" />
+      <path
+         style="fill:none;stroke:#ffffff;stroke-width:0.69999999;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 16.381114,240.54647 0.15269,1.9887"
+         id="path1439-3"
+         inkscape:connector-curvature="0"
+         inkscape:export-filename="N:\Koen\Projecten\Emcoturn 120\edingCNC\icons\icon_ID_turning_cycle.png"
+         inkscape:export-xdpi="37.799999"
+         inkscape:export-ydpi="37.799999" />
+      <path
+         style="fill:none;stroke:#ffffff;stroke-width:0.69999999;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 24.979114,236.66906 h 5.12615"
+         id="path1441-7"
+         inkscape:connector-curvature="0"
+         inkscape:export-filename="N:\Koen\Projecten\Emcoturn 120\edingCNC\icons\icon_ID_turning_cycle.png"
+         inkscape:export-xdpi="37.799999"
+         inkscape:export-ydpi="37.799999" />
+      <path
+         style="fill:none;stroke:#ffffff;stroke-width:0.69999999;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 19.494644,244.25456 h 10.61062"
+         id="path1441-0-9"
+         inkscape:connector-curvature="0"
+         inkscape:export-filename="N:\Koen\Projecten\Emcoturn 120\edingCNC\icons\icon_ID_turning_cycle.png"
+         inkscape:export-xdpi="37.799999"
+         inkscape:export-ydpi="37.799999" />
+      <path
+         style="fill:none;stroke:#ffffff;stroke-width:0.69999999;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 16.533804,242.53517 2.96084,1.71939"
+         id="path1458-4"
+         inkscape:connector-curvature="0"
+         inkscape:export-filename="N:\Koen\Projecten\Emcoturn 120\edingCNC\icons\icon_ID_turning_cycle.png"
+         inkscape:export-xdpi="37.799999"
+         inkscape:export-ydpi="37.799999" />
+      <path
+         style="fill:none;stroke:#ffffff;stroke-width:0.69999999;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 30.105264,236.66906 v 7.5855"
+         id="path1460-4"
+         inkscape:connector-curvature="0"
+         inkscape:export-filename="N:\Koen\Projecten\Emcoturn 120\edingCNC\icons\icon_ID_turning_cycle.png"
+         inkscape:export-xdpi="37.799999"
+         inkscape:export-ydpi="37.799999" />
+      <path
+         style="fill:#ffffff;stroke:#ffffff;stroke-width:0.26458332px;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+         d="m 15.328844,235.27029 0.45176,5.19388 5.16386,0.4544 -0.4518,-5.19388 -5.16382,-0.4544"
+         id="path1462-9"
+         inkscape:connector-curvature="0"
+         inkscape:export-filename="N:\Koen\Projecten\Emcoturn 120\edingCNC\icons\icon_ID_turning_cycle.png"
+         inkscape:export-xdpi="37.799999"
+         inkscape:export-ydpi="37.799999" />
+      <path
+         style="fill:none;stroke:#ffffff;stroke-width:0.69999999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 83.663223,246.6507 v -24.52736 h 11.244792 v 11.90625 h 5.858585"
+         id="path1629"
+         inkscape:connector-curvature="0" />
+      <path
+         style="fill:none;stroke:#ffffff;stroke-width:0.69999999;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 100.7666,234.02959 v -11.90625 h 5.76414 v 24.52736"
+         id="path1633"
+         inkscape:connector-curvature="0" />
+      <path
+         style="fill:none;stroke:#ffffff;stroke-width:0.1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 107.58908,222.12334 h 15.59329"
+         id="path1520-6"
+         inkscape:connector-curvature="0"
+         inkscape:export-filename="N:\Koen\Projecten\Emcoturn 120\edingCNC\dialog_pictures\dialog_external_threading.png"
+         inkscape:export-xdpi="300"
+         inkscape:export-ydpi="300" />
+      <path
+         style="fill:none;stroke:#ffffff;stroke-width:0.1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="M 102.35411,234.02959 H 112.9361"
+         id="path1520-6-8"
+         inkscape:connector-curvature="0"
+         inkscape:export-filename="N:\Koen\Projecten\Emcoturn 120\edingCNC\dialog_pictures\dialog_external_threading.png"
+         inkscape:export-xdpi="300"
+         inkscape:export-ydpi="300" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+         x="53.523312"
+         y="261.40891"
+         id="text7254-9-1-2-6-3-2-0"
+         inkscape:export-filename="N:\Koen\Projecten\Emcoturn 120\edingCNC\dialog_pictures\dialog_simple_boring.png"
+         inkscape:export-xdpi="300"
+         inkscape:export-ydpi="300"><tspan
+           sodipodi:role="line"
+           x="53.523312"
+           y="261.40891"
+           style="font-size:2.82222223px;fill:#ffffff;stroke-width:0.26458332"
+           id="tspan1704-3-9-5-3-7">peck depth: 0 = no pecking</tspan></text>
     </g>
     <path
        style="fill:none;stroke:#ffffff;stroke-width:0.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"

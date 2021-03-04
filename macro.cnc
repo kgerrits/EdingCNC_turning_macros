@@ -288,7 +288,7 @@ Sub user_7
 Endsub
 
 Sub user_8
-    msg "sub user_8"
+    gosub cycle_parting_off
 Endsub
 
 Sub user_9
