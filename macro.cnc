@@ -268,27 +268,27 @@ Sub user_2
 Endsub
 
 Sub user_3
-    gosub cycle_facing
+    goSub tool_minus_one
 Endsub
 
 Sub user_4 
-	gosub cycle_simple_turning
+	goSub tool_plus_one
 Endsub
 
 Sub user_5
-	gosub cycle_drilling
+	msg "sub user_5"
 Endsub
 
 Sub user_6
-    gosub cycle_external_threading
+    msg "sub user_6"
 Endsub
 
 Sub user_7
-    gosub cycle_internal_turning
+    msg "sub user_7"
 Endsub
 
 Sub user_8
-    gosub cycle_parting_off
+    msg "sub user_8"
 Endsub
 
 Sub user_9
@@ -300,12 +300,53 @@ Sub user_10
 Endsub
 
 Sub user_11
-    goSub tool_plus_one
+    gosub cycle_facing
 Endsub
 
 Sub user_12
-    goSub tool_minus_one
+    gosub cycle_OD_turning
 Endsub
+
+Sub user_13
+    gosub cycle_ID_turning
+Endsub
+
+Sub user_14
+	gosub cycle_drilling
+Endsub
+
+Sub user_15
+    gosub cycle_external_threading
+Endsub
+
+Sub user_16
+	gosub cycle_internal_threading
+Endsub
+
+Sub user_17
+    gosub cycle_parting_off
+Endsub
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ;Homing per axis
 Sub home_x
