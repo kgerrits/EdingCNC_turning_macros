@@ -141,12 +141,14 @@ sub cycle_OD_turning
 		M30
 	endif
 	
+	;; multiply depth of cut and finish alowance by 2: diameter programming
+	#1404 = [2* #1404]
+	#1405 = [2* #1405]
+	
 	;; sanity checks
 	;; -------------------------------------------------------------
 	;; TODO: 
 	;; - Z & diameter add allowance to checks
-	;; - Z clearance and retract amount >= 0
-	;; finish amount >= 0 & <= DOC
 	;; TODO: check start positions of axes
 	
 	if [#1400 <= #1401] ;; Z1 larger or equal than Z2
@@ -163,7 +165,7 @@ sub cycle_OD_turning
 	
 	;; turning routine
 	;; -------------------------------------------------------------
-	M53 ;; feed hold. Macro does not start immediately, toolpath can be checked in window
+	M0 ;; Hold program, press start button to resume. Toolpath can be checked on screen
 
 	;; goto safety position
 	G0 X#1402 Z[#1400 + #1408]
@@ -183,7 +185,7 @@ sub cycle_OD_turning
 	endif
 	
 	;; wait for spindle to ramp up (#5070 settling)
-	G4 P1 ;; wait for 1 second
+	G4 P2 ;; wait for 2 second
 
 	;; roughing
 	#1410 = 0 ;; roughing complete flag
@@ -194,7 +196,9 @@ sub cycle_OD_turning
 		if [#1411 > [#1403+#1405]] ;; perform cut with full DOC if resulting diameter > final + finish allowance
 			msg "next roughing pass X:"#1411
 			G0 X#1411 ;; x down
-			G1 Z[#1401 + #1405] F[#5070 * 60 * #1407] ;; cut and calculate feedrate in mm/min --> workaround for edingCNC "bug" where feedoverride does not work icm with G95 and G96 active
+			#1414 = [[#1406 * 1000] / [3.14159 * #1411]] ;; rpm calculation
+			msg "spindle RPM:"#1414
+			G1 Z[#1401 + #1405] F[#1414 * #1407] ;; cut and calculate feedrate in mm/min --> workaround for edingCNC "bug" where feedoverride does not work icm with G95 and G96 active
 			G1 X[#5001 + #1409] ;; retract X
 			G0 Z[#1400 + #1408] ;; rapid Z to clearance
 			#1412 = #1411 ;; update last cut diameter
@@ -203,10 +207,12 @@ sub cycle_OD_turning
 			
 		endif
 
-		if [#1411 <= [#1403+#1405]] ;; perform cut up to finish allowance diameter
+		if [#1411 <= [#1403 + #1405] ] ;; perform cut up to finish allowance diameter
 			msg "next roughing pass X:"[#1403 + #1405]
 			G0 X[#1403 + #1405] ;; x down to final diameter + finish amount
-			G1 Z[#1401 + #1405] F[#5070 * 60 * #1407] ;; cut
+			#1414 = [[#1406 * 1000] / [3.14159 * [#1403 + #1405]]] ;; rpm calculation
+			msg "spindle RPM:"#1414
+			G1 Z[#1401 + #1405] F[#1414 * #1407] ;; cut
 			G1 X[#5001 + #1409] ;; retract X
 			G0 Z[#1400 + #1408] ;; rapid Z to clearance
 			#1410 = 1 ;; roughing completed
@@ -214,17 +220,14 @@ sub cycle_OD_turning
 		
 		endif
 		
-		;;else
-		;;	errmsg "chosen parameters caused a roughing error"
-		;;endif
-		
-		
 	endwhile
 	
 	;; finish pass
 	msg "Finishing pass X:"#1403
 	G0 X[#1403] ;; x down to final diameter + finish amount
-	G1 Z[#1401] F[#5070 * 60 * #1407] ;; cut
+	#1414 = [[#1406 * 1000] / [3.14159 * #1403]] ;; rpm calculation
+	msg "spindle RPM:"#1414
+	G1 Z[#1401] F[#1414 * #1407] ;; cut
 	G1 X[#1402 + #1409] ;; cut backface to start diameter + retract amount
 	G0 Z[#1400 + #1408] ;; rapid Z to clearance
 	msg "finish pass completed"
@@ -233,6 +236,11 @@ sub cycle_OD_turning
 	M9 ;; stop cooling
 	M5 ;; stop spindle
 	G30 ;; go to safe position
+	
+	;; divide depth of cut and finish alowance by 2: for storing parameters
+	#1404 = [#1404 / 2]
+	#1405 = [#1405 / 2]
+	
 	M30 ;; end program
 endsub
 
