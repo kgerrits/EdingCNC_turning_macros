@@ -261,14 +261,14 @@ sub cycle_drilling
 	#1451 = -5 ;; Z2
 	#1452 = 1 ;; include tip (0 = no, 1 = yes)
 	#1453 = 118 ;; tip angle
-	#1454 = 4.2 ;; drill diameter
+	#1454 = [#5009 * 2] ;; drill diameter (Actual tool diameter)
 	#1455 = 2 ;; Z clearance
 	#1456 = 2 ;; peck depth (0 = no pecking)
 	#1457 = 0.2 ;; retract amount
 	#1458 = 0 ;; full retract (0 = no, 1 = yes)
 	#1459 = 70 ;; Vc
 	#1460 = 0.05 ;; fn [mm/rev]
-	
+		
 
 	;; dialog with picture
 	
@@ -297,7 +297,8 @@ sub cycle_drilling
 	
 
 	;; -------------------------------------------------------------
-	M53 ;; feed hold. Macro does not start immediately, toolpath can be checked in window
+	M48 ;; enable feed and speed override
+	M50 P0 ;; feed override to 0%. Macro does not start immediately, toolpath can be checked in window
 	
 	;; move to home
 	G28
@@ -371,12 +372,10 @@ sub cycle_drilling
 		endif
 		
 	endif
-	
-	
 
 	M9 ;; stop cooling
 	M5 ;; stop spindle
-	;; TODO retract Z axis before calling home position
+	G0 G53 Z#5123 ;; go to Z home
 	G30 ;; go to safe position
 	M30 ;; end program
 	
@@ -689,7 +688,7 @@ sub cycle_internal_threading
 	#1704 = 1.00 ;; Pitch
 	#1705 = 0.08 ;; depth per pass
 	#1706 = 800 ;; spindle speed [rev/min] | negative for left hand threads
-	#1708 = 2 ;; spindle speed [rev/min] | negative for left hand threads
+	#1708 = 2 ;; Z clearance
 
 
 	;; dialog with picture
@@ -738,4 +737,48 @@ sub cycle_internal_threading
 	M5 ;; stop spindle
 	G30 ;; go to safe position
 	M30 ;; end program
+endsub
+
+sub cycle_OD_turning_chamfer_radius
+
+	;; outside diameter turning macro with corner radius and chamfer
+	
+	;; default values for dialog window
+	#1750 = 0 ;; Z1
+	#1751 = -5 ;; Z2
+	#1752 = 20 ;; diameter A
+	#1753 = 10 ;; diameter B
+	#1754 = 2 ;; chamfer 1
+	#1755 = 3 ;; chamfer 2
+	#1756 = 2 ;; radius 1
+	#1757 = 0.75 ;; Depth of cut
+	#1758 = 0.4 ;; Finish amount
+	#1759 = 150 ;; Vc, cutting speed [m/min]
+	#1760 = 0.1 ;; F, feed per rev [mm/rev]
+	#1761 = 2 ;; Z clearance
+	#1762 = 0.5 ;; retract amount
+	#1763 = 3000 ;; max spindle speed
+	;; dialog with picture
+	
+	dlgmsg "cycle OD turning" "Z1" 1750 "Z2" 1751 "diameter A" 1752 "diameter B" 1753 "Chamfer 1" 1754 "Chamfer 2" 1755 "Radius 1" 1756 "Depth of cut" 1757 "Finish amount" 1758 "Vc [m/min]" 1759 "F [mm/rev]" 1760 "Z clearance" 1761 "retract amount" 1762 "max spindle speed [rpm]" 1763
+	
+	if [#5398 == -1] ;; dialog canceled
+		M30
+	endif
+	
+	;; multiply depth of cut and finish alowance by 2: diameter programming
+	#1757 = [2* #1757]
+	#1758 = [2* #1758]
+	
+	; #5009 = actual tool radius
+	
+	if [#5009 >= #1756] ;; if actual tool radius greater or equal to corner radius --> do simple turning without radius
+	
+	else
+	; stair down roughing with corner radius
+	
+	
+	endif
+
+
 endsub
