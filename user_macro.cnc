@@ -62,6 +62,8 @@ sub cycle_facing
 	
 	;; turning routine
 	;; -------------------------------------------------------------
+	M48 ;; enable feed and speed override
+	M50 P0 ;; feed override to 0%. Macro does not start immediately
 
 	;; goto safety position
 	G0 X[#1502 + #1509] Z[#1500 + #1508]
@@ -165,7 +167,8 @@ sub cycle_OD_turning
 	
 	;; turning routine
 	;; -------------------------------------------------------------
-	M0 ;; Hold program, press start button to resume.
+	M48 ;; enable feed and speed override
+	M50 P0 ;; feed override to 0%. Macro does not start immediately
 
 	;; goto safety position
 	G0 X#1402 Z[#1400 + #1408]
@@ -298,7 +301,7 @@ sub cycle_drilling
 
 	;; -------------------------------------------------------------
 	M48 ;; enable feed and speed override
-	M50 P0 ;; feed override to 0%. Macro does not start immediately, toolpath can be checked in window
+	M50 P0 ;; feed override to 0%. Macro does not start immediately
 	
 	;; move to home
 	G28
@@ -427,6 +430,9 @@ sub cycle_external_threading
 	else
 		G97 S[-1*#1556] M3 ;; turn spindle CW (left hand thread)
 	endif
+	
+	M48 ;; enable feed and speed override
+	M50 P0 ;; feed override to 0%. Macro does not start immediately
 
     ;; goto thread start position
 	G0 X#1552 Z#1550
@@ -493,7 +499,8 @@ sub cycle_ID_turning
 
     ;; turning routine
 	;; -------------------------------------------------------------
-	M0 ;; Hold program, press start button to resume.
+	M48 ;; enable feed and speed override
+	M50 P0 ;; feed override to 0%. Macro does not start immediately
 
 	;; goto safety position
 	G0 X[#1602 + #1604] Z[#1600 + #1608]
@@ -625,6 +632,9 @@ sub cycle_parting_off
 
     ;; enable spindle
 	G97 S#1655 M3
+	
+	M48 ;; enable feed and speed override
+	M50 P0 ;; feed override to 0%. Macro does not start immediately
 
     if [#1656 == 0] ;; no pecking
 
@@ -723,6 +733,9 @@ sub cycle_internal_threading
 	else
 		G97 S[-1*#1706] M3 ;; turn spindle CW (left hand thread)
 	endif
+	
+	M48 ;; enable feed and speed override
+	M50 P0 ;; feed override to 0%. Macro does not start immediately
 
     ;; goto thread start position
 	G0 X[#1703-#1704] Z#1700
