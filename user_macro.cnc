@@ -267,7 +267,7 @@ sub cycle_drilling
 	#1454 = [#5009 * 2] ;; drill diameter (Actual tool diameter)
 	#1455 = 2 ;; Z clearance
 	#1456 = 2 ;; peck depth (0 = no pecking)
-	#1457 = 0.2 ;; retract amount
+	;;#1457 = 0.2 ;; retract value
 	#1458 = 0 ;; full retract (0 = no, 1 = yes)
 	#1459 = 70 ;; Vc
 	#1460 = 0.05 ;; fn [mm/rev]
@@ -275,16 +275,19 @@ sub cycle_drilling
 
 	;; dialog with picture
 	
-	dlgmsg "drilling" "Z1" 1450 "Z2" 1451 "tip include" 1452 "tip angle" 1453 "diameter" 1454 "Z clearance" 1455 "peck depth" 1456 "retract amount" 1457 "full retract" 1458 "Vc [m/min]" 1459 "feed [mm/rev]" 1460
+	dlgmsg "drilling" "Z1" 1450 "Z2" 1451 "tip include" 1452 "tip angle" 1453 "diameter" 1454 "Z clearance" 1455 "peck depth" 1456 "full retract" 1458 "Vc [m/min]" 1459 "feed [mm/rev]" 1460
 	
 	if [#5398 == -1] ;; dialog canceled
 		M30
 	endif
 	
+	#1457 = [#1450 + #1455]
+	
 	;; sanity checks
 	;; -------------------------------------------------------------
 	;; TODO:
 	;; check start positions of axes
+	;; retract value > Z2
 	
 	
 	;; Calculate parameters
@@ -308,7 +311,7 @@ sub cycle_drilling
 	
 	;; move to Z clearance position
 	G0 X0
-	G0 Z#1455
+	G0 Z[#1450 + #1455]
 	
 	;; start spindle
 	;; limit speed to 4000 RPM
@@ -329,12 +332,12 @@ sub cycle_drilling
 			G1 Z[#1451-#1463] F#1462
 			G4 P0.1 ;; dwell for 0.1 to get flat bottom 
 			G91 G1 Z#1457 ;; retract with feed in incremental mode
-			G90 G0 Z#1455 ;; rapid to safe position 
+			G90 G0 Z[#1450 + #1455] ;; rapid to safe position 
 		else
 			G1 Z#1451 F#1462
 			G4 P0.1 ;; dwell for 0.1 to get flat bottom 
 			G91 G1 Z#1457 ;; retract with feed in incremental mode
-			G90 G0 Z#1455 ;; rapid to safe position 
+			G90 G0 Z[#1450 + #1455] ;; rapid to safe position 
 		endif
 		
 	endif
@@ -347,12 +350,12 @@ sub cycle_drilling
 			G17 ;; switch plane --> G18 creates bug function error message in Eding CNC
 			G73 X0 Z[#1451-#1463] R#1457 Q#1456 F#1462
 			G18 ;; switch back to XZ plane
-			G0 Z#1455 ;; rapid to safe position 
+			G0 Z[#1450 + #1455] ;; rapid to safe position 
 		else
 			G17 ;; switch plane --> G18 creates bug function error message in Eding CNC
 			G73 X0 Z#1451 R#1457 Q#1456 F#1462
 			G18 ;; switch back to XZ plane
-			G0 Z#1455 ;; rapid to safe position 
+			G0 Z[#1450 + #1455] ;; rapid to safe position 
 		endif
 	endif
 	
@@ -364,13 +367,13 @@ sub cycle_drilling
 			G17 ;; switch plane --> G18 creates bug function error message in Eding CNC
 			G83 X0 Y0 Z[#1451-#1463] R#1457 Q#1456 F#1462
 			G18 ;; switch back to XZ plane
-			G0 Z#1455 ;; rapid to safe position 
+			G0 Z[#1450 + #1455] ;; rapid to safe position 
 
 		else
 			G17 ;; switch plane --> G18 creates bug function error message in Eding CNC
 			G83 X0 Y0 Z#1451 R#1457 Q#1456 F#1462
 			G18 ;; switch back to XZ plane
-			G0 Z#1455 ;; rapid to safe position 
+			G0 Z[#1450 + #1455] ;; rapid to safe position 
 			
 		endif
 		
@@ -507,16 +510,21 @@ sub cycle_ID_turning
 	
 	;; enable spindle
 	if [#1610 == 0]
-		G96 S#1606 ;; max spindle speed = max spindle speed of machine
-	else
-		G96 S#1606 D#1610
-	endif
-	
-	;; check sign of Vc for spindle directions
-	if [#1606 > 0] ;; turn CW
-		M3
-	else ;; turn CCW
-		M4
+		if [#1606 < 0]
+			#1606 = [#1606 * -1] ;; negative cutting speed not allowed, use this for M4 (CCW) enable
+			M4 G96 S#1606
+		endif 
+		
+		;; turn CW
+		M3 G96 S#1606 ;; max spindle speed = max spindle speed of machine
+	else	
+		if [#1606 < 0]
+			#1606 = [#1606 * -1] ;; negative cutting speed not allowed, use this for M4 (CCW) enable
+			M4 G96 S#1606 D#1610
+		endif 
+		
+		;; turn CW
+		M3 G96 S#1606 D#1610 
 	endif
 	
 	;; wait for spindle to ramp up (#5070 settling)
@@ -583,6 +591,7 @@ sub cycle_ID_turning
 	;; end macro
 	M9 ;; stop cooling
 	M5 ;; stop spindle
+	G0 G53 Z#5123 ;; go to Z home
 	G30 ;; go to safe position
 	
 	;; divide depth of cut and finish alowance by 2: for storing parameters
