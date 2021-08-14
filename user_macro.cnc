@@ -1,5 +1,93 @@
 ;user macro
 
+sub set_default_cycle_parameters
+	;; sets all parameters related to turning cycles to default value
+	
+	;; cycle facing
+	#1500 = 1 ;; Z1
+	#1501 = 0 ;; Z2
+	#1502 = 20 ;; diameter A
+	#1503 = -0.1 ;; diameter B
+	#1504 = 0.3 ;; Depth of cut
+	#1505 = 0.2 ;; Finish amount
+	#1506 = 150 ;; Vc, cutting speed [m/s]
+	#1507 = 400 ;; F, cutting feed [mm/min]
+	#1508 = 2 ;; Z clearance
+	#1509 = 2 ;; X clearance
+	
+	;; cycle_OD_turning
+	#1400 = 0 ;; Z1
+	#1401 = -5 ;; Z2
+	#1402 = 20 ;; diameter A
+	#1403 = 10 ;; diameter B
+	#1404 = 0.75 ;; Depth of cut
+	#1405 = 0.4 ;; Finish amount
+	#1406 = 150 ;; Vc, cutting speed [m/min]
+	#1407 = 0.1 ;; F, feed per rev [mm/rev]
+	#1408 = 2 ;; Z clearance
+	#1409 = 0.5 ;; retract amount
+	#1413 = 3000 ;; max spindle speed
+	
+	;; cycle drilling
+	#1450 = 0 ;; Z1
+	#1451 = -5 ;; Z2
+	#1452 = 1 ;; include tip (0 = no, 1 = yes)
+	#1453 = 118 ;; tip angle
+	#1454 = [#5009 * 2] ;; drill diameter (Actual tool diameter)
+	#1455 = 2 ;; Z clearance
+	#1456 = 2 ;; peck depth (0 = no pecking)
+	;;#1457 = 0.2 ;; retract value
+	#1458 = 0 ;; full retract (0 = no, 1 = yes)
+	#1459 = 70 ;; Vc
+	#1460 = 0.05 ;; fn [mm/rev]
+	
+	;; cycle external threading
+	#1550 = 0 ;; Z1
+	#1551 = -10 ;; Z2
+	#1552 = 12 ;; diameter A
+	#1553 = 10.773 ;; diameter B
+	#1554 = 1.00 ;; Pitch
+	#1555 = 0.08 ;; depth per pass
+	#1556 = 800 ;; spindle speed [rev/min] | negative for left hand threads
+	
+	;; cycle ID turning
+	#1600 = 0 ;; Z1
+	#1601 = -5 ;; Z2
+	#1602 = 8 ;; diameter A
+	#1603 = 12 ;; diameter B
+	#1604 = 0.2 ;; Depth of cut
+	#1605 = 0.1 ;; Finish amount
+	#1606 = 150 ;; Vc, cutting speed [m/min]
+	#1607 = 0.1 ;; F, feed per rev [mm/rev]
+	#1608 = 2 ;; Z clearance
+	#1609 = 0.5 ;; retract amount
+	#1610 = 3000 ;; max spindle speed
+	
+	;; cycle parting off
+	#1650 = 0 ;; Zstart
+	#1651 = 20 ;; diameter A
+	#1652 = -0.1 ;; diameter B
+    #1653 = 2.5 ;; tool width
+	#1654 = 0.1 ;; F, feed per rev [mm/rev]
+    #1655 = 1500 ;; spindle speed [rev/min]
+	#1656 = 1.0 ;; pecking depth
+    #1657 = 0.05 ;; retract amount
+    #1658 = 0.1 ;; dwell time
+	
+	;; cycle internal threading
+	#1700 = 0 ;; Z1
+	#1701 = -10 ;; Z2
+	#1702 = 12 ;; diameter A
+	#1703 = 10.917 ;; diameter B
+	#1704 = 1.00 ;; Pitch
+	#1705 = 0.08 ;; depth per pass
+	#1706 = 800 ;; spindle speed [rev/min] | negative for left hand threads
+	#1708 = 2 ;; Z clearance
+	
+	msg "default cycle parameters set"
+
+endsub
+
 sub tool_plus_one
 
 	if [#5008 < 99]
@@ -17,21 +105,23 @@ sub tool_minus_one
 	endif
 endsub
 
-sub cycle_facing
+sub cycle_facing_parameters
 
 ;; lathe facing macro
+;; ---------------------------------------------------------------
 	
 	;; default values for dialog window
-	#1500 = 1 ;; Z1
-	#1501 = 0 ;; Z2
-	#1502 = 20 ;; diameter A
-	#1503 = -0.1 ;; diameter B
-	#1504 = 0.3 ;; Depth of cut
-	#1505 = 0.2 ;; Finish amount
-	#1506 = 150 ;; Vc, cutting speed [m/s]
-	#1507 = 400 ;; F, cutting feed [mm/min]
-	#1508 = 2 ;; Z clearance
-	#1509 = 2 ;; X clearance
+	;; #1500 = 1 ;; Z1
+	;; #1501 = 0 ;; Z2
+	;; #1502 = 20 ;; diameter A
+	;; #1503 = -0.1 ;; diameter B
+	;; #1504 = 0.3 ;; Depth of cut
+	;; #1505 = 0.2 ;; Finish amount
+	;; #1506 = 150 ;; Vc, cutting speed [m/s]
+	;; #1507 = 400 ;; F, cutting feed [mm/min]
+	;; #1508 = 2 ;; Z clearance
+	;; #1509 = 2 ;; X clearance
+	
 	;; dialog with picture
 	
 	dlgmsg "dialog_facing" "Z1" 1500 "Z2" 1501 "diameter A" 1502 "diameter B" 1503 "DOC" 1504 "finish amount" 1505 "Vc [m/min]" 1506 "F [mm/min]" 1507 "Z clearance" 1508 "X clearance" 1509
@@ -59,6 +149,13 @@ sub cycle_facing
 	if [#1509 < 0] ;; X clearance must be positive
 		errmsg "Clearance value must be positive."
 	endif
+	
+	;; parameters verified, go to facing cycle
+	gosub cycle_facing
+	
+endsub
+
+sub cycle_facing
 	
 	;; turning routine
 	;; -------------------------------------------------------------
@@ -120,21 +217,23 @@ sub cycle_facing
 	
 endsub
 
-sub cycle_OD_turning
+sub cycle_OD_turning_parameters
 	;; simple outside diameter turning macro
+	;; -------------------------------------------------------------
 	
 	;; default values for dialog window
-	#1400 = 0 ;; Z1
-	#1401 = -5 ;; Z2
-	#1402 = 20 ;; diameter A
-	#1403 = 10 ;; diameter B
-	#1404 = 0.75 ;; Depth of cut
-	#1405 = 0.4 ;; Finish amount
-	#1406 = 150 ;; Vc, cutting speed [m/min]
-	#1407 = 0.1 ;; F, feed per rev [mm/rev]
-	#1408 = 2 ;; Z clearance
-	#1409 = 0.5 ;; retract amount
-	#1413 = 3000 ;; max spindle speed
+	;; #1400 = 0 ;; Z1
+	;; #1401 = -5 ;; Z2
+	;; #1402 = 20 ;; diameter A
+	;; #1403 = 10 ;; diameter B
+	;; #1404 = 0.75 ;; Depth of cut
+	;; #1405 = 0.4 ;; Finish amount
+	;; #1406 = 150 ;; Vc, cutting speed [m/min]
+	;; #1407 = 0.1 ;; F, feed per rev [mm/rev]
+	;; #1408 = 2 ;; Z clearance
+	;; #1409 = 0.5 ;; retract amount
+	;; #1413 = 3000 ;; max spindle speed
+	
 	;; dialog with picture
 	
 	dlgmsg "simple_turning" "Z1" 1400 "Z2" 1401 "diameter A" 1402 "diameter B" 1403 "DOC" 1404 "finish amount" 1405 "Vc [m/min]" 1406 "F [mm/rev]" 1407 "Z clearance" 1408 "retract amount" 1409 "max spindle speed [rpm]" 1413
@@ -164,6 +263,13 @@ sub cycle_OD_turning
 	if [#1404 <= 0] ;; DOC 0 or negative
 		errmsg "DOC cannot be negative or equal to 0"
 	endif
+	
+	;; parameters verified, go to OD turning cycle
+	gosub cycle_OD_turning
+	
+endsub 
+
+sub cycle_OD_turning
 	
 	;; turning routine
 	;; -------------------------------------------------------------
@@ -256,21 +362,21 @@ sub cycle_OD_turning
 	M30 ;; end program
 endsub
 
-sub cycle_drilling
+sub cycle_drilling_parameters
 ;; lathe drilling macro
 	
 	;; default values for dialog window
-	#1450 = 0 ;; Z1
-	#1451 = -5 ;; Z2
-	#1452 = 1 ;; include tip (0 = no, 1 = yes)
-	#1453 = 118 ;; tip angle
+	;;#1450 = 0 ;; Z1
+	;;#1451 = -5 ;; Z2
+	;;#1452 = 1 ;; include tip (0 = no, 1 = yes)
+	;;#1453 = 118 ;; tip angle
 	#1454 = [#5009 * 2] ;; drill diameter (Actual tool diameter)
-	#1455 = 2 ;; Z clearance
-	#1456 = 2 ;; peck depth (0 = no pecking)
+	;;#1455 = 2 ;; Z clearance
+	;;#1456 = 2 ;; peck depth (0 = no pecking)
 	;;#1457 = 0.2 ;; retract value
-	#1458 = 0 ;; full retract (0 = no, 1 = yes)
-	#1459 = 70 ;; Vc
-	#1460 = 0.05 ;; fn [mm/rev]
+	;;#1458 = 0 ;; full retract (0 = no, 1 = yes)
+	;;#1459 = 70 ;; Vc
+	;;#1460 = 0.05 ;; fn [mm/rev]
 		
 
 	;; dialog with picture
@@ -288,7 +394,13 @@ sub cycle_drilling
 	;; TODO:
 	;; check start positions of axes
 	;; retract value > Z2
-	
+
+	;; parameters verified, go to OD turning cycle
+	gosub cycle_drilling
+
+endsub
+
+sub cycle_drilling
 	
 	;; Calculate parameters
 	;; spinde speed
@@ -388,17 +500,17 @@ sub cycle_drilling
 
 endsub
 
-sub cycle_external_threading
+sub cycle_external_threading_parameters
 ;; threading macro
 
 	;; default values for dialog window
-	#1550 = 0 ;; Z1
-	#1551 = -10 ;; Z2
-	#1552 = 12 ;; diameter A
-	#1553 = 10.773 ;; diameter B
-	#1554 = 1.00 ;; Pitch
-	#1555 = 0.08 ;; depth per pass
-	#1556 = 800 ;; spindle speed [rev/min] | negative for left hand threads
+	;; #1550 = 0 ;; Z1
+	;; #1551 = -10 ;; Z2
+	;; #1552 = 12 ;; diameter A
+	;; #1553 = 10.773 ;; diameter B
+	;; #1554 = 1.00 ;; Pitch
+	;; #1555 = 0.08 ;; depth per pass
+	;; #1556 = 800 ;; spindle speed [rev/min] | negative for left hand threads
 
 
 	;; dialog with picture
@@ -420,7 +532,13 @@ sub cycle_external_threading
 		errmsg "spindle speed must be larger than 0"
 	endif
 
+	;; parameters verified, go to external threading cycle
+	gosub cycle_external_threading
+	
+endsub
 
+sub cycle_external_threading
+	
     ;; calculate threading parameters
     #1557 = [[#1552 - #1553]/2] ;; full thread depth beyond thread peak
 
@@ -451,22 +569,22 @@ sub cycle_external_threading
 
 endsub
 
-sub cycle_ID_turning
+sub cycle_ID_turning_parameters
 
 ;; simple inside diameter turning macro
 	
 	;; default values for dialog window
-	#1600 = 0 ;; Z1
-	#1601 = -5 ;; Z2
-	#1602 = 8 ;; diameter A
-	#1603 = 12 ;; diameter B
-	#1604 = 0.2 ;; Depth of cut
-	#1605 = 0.1 ;; Finish amount
-	#1606 = 150 ;; Vc, cutting speed [m/min]
-	#1607 = 0.1 ;; F, feed per rev [mm/rev]
-	#1608 = 2 ;; Z clearance
-	#1609 = 0.5 ;; retract amount
-	#1610 = 3000 ;; max spindle speed
+	;; #1600 = 0 ;; Z1
+	;; #1601 = -5 ;; Z2
+	;; #1602 = 8 ;; diameter A
+	;; #1603 = 12 ;; diameter B
+	;; #1604 = 0.2 ;; Depth of cut
+	;; #1605 = 0.1 ;; Finish amount
+	;; #1606 = 150 ;; Vc, cutting speed [m/min]
+	;; #1607 = 0.1 ;; F, feed per rev [mm/rev]
+	;; #1608 = 2 ;; Z clearance
+	;; #1609 = 0.5 ;; retract amount
+	;; #1610 = 3000 ;; max spindle speed
 
 	;; dialog with picture
 	
@@ -499,6 +617,13 @@ sub cycle_ID_turning
 	if [#1604 <= 0] ;; DOC 0 or negative
 		errmsg "DOC cannot be negative or equal to 0"
 	endif
+	
+	;; parameters verified, go to ID turning cycle
+	gosub cycle_ID_turning
+	
+endsub 
+
+sub cycle_ID_turning
 
     ;; turning routine
 	;; -------------------------------------------------------------
@@ -513,18 +638,22 @@ sub cycle_ID_turning
 		if [#1606 < 0]
 			#1606 = [#1606 * -1] ;; negative cutting speed not allowed, use this for M4 (CCW) enable
 			M4 G96 S#1606
+			
+		else
+			;; turn CW
+			M3 G96 S#1606 ;; max spindle speed = max spindle speed of machine
 		endif 
-		
-		;; turn CW
-		M3 G96 S#1606 ;; max spindle speed = max spindle speed of machine
+
 	else	
 		if [#1606 < 0]
 			#1606 = [#1606 * -1] ;; negative cutting speed not allowed, use this for M4 (CCW) enable
 			M4 G96 S#1606 D#1610
+			
+		else
+			;; turn CW
+			M3 G96 S#1606 D#1610 
 		endif 
 		
-		;; turn CW
-		M3 G96 S#1606 D#1610 
 	endif
 	
 	;; wait for spindle to ramp up (#5070 settling)
@@ -602,19 +731,19 @@ sub cycle_ID_turning
 
 endsub
 
-sub cycle_parting_off
+sub cycle_parting_off_parameters
 ;; parting-off macro
 
 	;; default values for dialog window
-	#1650 = 0 ;; Zstart
-	#1651 = 20 ;; diameter A
-	#1652 = -0.1 ;; diameter B
-    #1653 = 2.5 ;; tool width
-	#1654 = 0.1 ;; F, feed per rev [mm/rev]
-    #1655 = 1500 ;; spindle speed [rev/min]
-	#1656 = 1.0 ;; pecking depth
-    #1657 = 0.05 ;; retract amount
-    #1658 = 0.1 ;; dwell time
+	;; #1650 = 0 ;; Zstart
+	;; #1651 = 20 ;; diameter A
+	;; #1652 = -0.1 ;; diameter B
+    ;; #1653 = 2.5 ;; tool width
+	;; #1654 = 0.1 ;; F, feed per rev [mm/rev]
+    ;; #1655 = 1500 ;; spindle speed [rev/min]
+	;; #1656 = 1.0 ;; pecking depth
+    ;; #1657 = 0.05 ;; retract amount
+    ;; #1658 = 0.1 ;; dwell time
 
 	;; dialog with picture
 	
@@ -635,6 +764,13 @@ sub cycle_parting_off
     if [#1655 == 0] ;; spindle speed 0
 		errmsg "spindle speed must be larger than 0"
 	endif
+	
+	;; parameters verified, go to parting off cycle
+	gosub cycle_parting_off
+	
+endsub
+
+sub cycle_parting_off
 
     ;; parting off routine
 	;; -------------------------------------------------------------
@@ -695,19 +831,19 @@ sub cycle_parting_off
 
 endsub
 
-sub cycle_internal_threading
+sub cycle_internal_threading_parameters
 
 ;; internal threading macro
 
 	;; default values for dialog window
-	#1700 = 0 ;; Z1
-	#1701 = -10 ;; Z2
-	#1702 = 12 ;; diameter A
-	#1703 = 10.917 ;; diameter B
-	#1704 = 1.00 ;; Pitch
-	#1705 = 0.08 ;; depth per pass
-	#1706 = 800 ;; spindle speed [rev/min] | negative for left hand threads
-	#1708 = 2 ;; Z clearance
+	;; #1700 = 0 ;; Z1
+	;; #1701 = -10 ;; Z2
+	;; #1702 = 12 ;; diameter A
+	;; #1703 = 10.917 ;; diameter B
+	;; #1704 = 1.00 ;; Pitch
+	;; #1705 = 0.08 ;; depth per pass
+	;; #1706 = 800 ;; spindle speed [rev/min] | negative for left hand threads
+	;; #1708 = 2 ;; Z clearance
 
 
 	;; dialog with picture
@@ -733,6 +869,13 @@ sub cycle_internal_threading
     ;; calculate threading parameters
     #1707 = [[#1702 - #1703]/2] ;; full thread depth beyond thread peak
 
+	;; parameters verified, go to internal threading cycle
+	gosub cycle_internal_threading
+
+endsub
+
+
+Sub cycle_internal_threading
     ;; start threading cycle
     ;; -------------------------------------------------------------
 	

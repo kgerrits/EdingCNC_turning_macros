@@ -85,6 +85,7 @@ endsub
 ;Tool length an diameter is retrieved from tool table.
 ;Warning the length in the tool table must not be 10 mm or more shorter as the tool,
 ;Otherwise collision with the tool-setter will happen!!!!!!!
+
 sub m_tool_no_dlg
     if [[#5380==0] and [#5397==0]] ;do this only when not simulating and not rendering
         ;Check if toolsetter is calibrated
@@ -300,31 +301,31 @@ Sub user_10
 Endsub
 
 Sub user_11
-    gosub cycle_facing
+    gosub cycle_facing_parameters
 Endsub
 
 Sub user_12
-    gosub cycle_OD_turning
+    gosub cycle_OD_turning_parameters
 Endsub
 
 Sub user_13
-    gosub cycle_ID_turning
+    gosub cycle_ID_turning_parameters
 Endsub
 
 Sub user_14
-	gosub cycle_drilling
+	gosub cycle_drilling_parameters
 Endsub
 
 Sub user_15
-    gosub cycle_external_threading
+    gosub cycle_external_threading_parameters
 Endsub
 
 Sub user_16
-	gosub cycle_internal_threading
+	gosub cycle_internal_threading_parameters
 Endsub
 
 Sub user_17
-    gosub cycle_parting_off
+    gosub cycle_parting_off_parameters
 Endsub
 
 
@@ -439,6 +440,7 @@ sub home_all
     gosub home_b
     gosub home_c
 	gosub home_toolchanger
+	gosub set_default_cycle_parameters
     msg "Home complete"
 endsub
 
