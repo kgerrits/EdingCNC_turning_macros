@@ -14,6 +14,7 @@ sub set_default_cycle_parameters
 	#1507 = 400 ;; F, cutting feed [mm/min]
 	#1508 = 2 ;; Z clearance
 	#1509 = 2 ;; X clearance
+	#1513 = 3000 ;; max spindle speed [rpm]
 	
 	;; cycle_OD_turning
 	#1400 = 0 ;; Z1
@@ -27,6 +28,7 @@ sub set_default_cycle_parameters
 	#1408 = 2 ;; Z clearance
 	#1409 = 0.5 ;; retract amount
 	#1413 = 3000 ;; max spindle speed
+	#1415 = 0.05 ;; Finish amount face
 	
 	;; cycle drilling
 	#1450 = 0 ;; Z1
@@ -56,12 +58,13 @@ sub set_default_cycle_parameters
 	#1602 = 8 ;; diameter A
 	#1603 = 12 ;; diameter B
 	#1604 = 0.2 ;; Depth of cut
-	#1605 = 0.1 ;; Finish amount
+	#1605 = 0.1 ;; Finish amount diameter
 	#1606 = 150 ;; Vc, cutting speed [m/min]
 	#1607 = 0.1 ;; F, feed per rev [mm/rev]
 	#1608 = 2 ;; Z clearance
 	#1609 = 0.5 ;; retract amount
 	#1610 = 3000 ;; max spindle speed
+	#1615 = 0.05 ;; Finish amount wall
 	
 	;; cycle parting off
 	#1650 = 0 ;; Zstart
@@ -121,10 +124,11 @@ sub cycle_facing_parameters
 	;; #1507 = 400 ;; F, cutting feed [mm/min]
 	;; #1508 = 2 ;; Z clearance
 	;; #1509 = 2 ;; X clearance
+	;; #1513 = 3000;; max spindle speed
 	
 	;; dialog with picture
 	
-	dlgmsg "dialog_facing" "Z1" 1500 "Z2" 1501 "diameter A" 1502 "diameter B" 1503 "DOC" 1504 "finish amount" 1505 "Vc [m/min]" 1506 "F [mm/min]" 1507 "Z clearance" 1508 "X clearance" 1509
+	dlgmsg "dialog_facing" "Z1" 1500 "Z2" 1501 "diameter A" 1502 "diameter B" 1503 "DOC" 1504 "finish amount" 1505 "Vc [m/min]" 1506 "Max spindle speed [rpm]" 1513 "F [mm/min]" 1507 "Z clearance" 1508 "X clearance" 1509
 	
 	if [#5398 == -1] ;; dialog canceled
 		M30
@@ -165,14 +169,36 @@ sub cycle_facing
 	;; goto safety position
 	G0 X[#1502 + #1509] Z[#1500 + #1508]
 	
+	;; overwrite max spindle speed
+	#1513 = ABS[#1513] ;; max spindle speed not accepted as negative parameter
+	
 	;; enable spindle
-	G96 S#1506 D4000
-	;; check sign of Vc for spindle directions
-	if [#1506 > 0] ;; turn CW
-		M3
-	else ;; turn CCW
-		M4
+	if [#1513 == 0] ;; run G96 at max machine set spindle speed
+		if [#1506 < 0]
+			#1506 = [#1506 * -1] ;; negative cutting speed not allowed, use this for M4 (CCW) enable
+			M4 G96 S#1506
+			
+		else
+			;; turn CW
+			M3 G96 S#1506 ;; max spindle speed = max spindle speed of machine
+		endif 
+
+	else ;; run G96 at limit speed from dialog
+		if [#1506 < 0]
+			#1506 = [#1506 * -1] ;; negative cutting speed not allowed, use this for M4 (CCW) enable
+			M4 G96 S#1506 D#1513
+			
+		else
+			;; turn CW
+			M3 G96 S#1506 D#1513
+		endif 
+		
 	endif
+	
+	
+	
+	;; wait for spindle to ramp up (#5070 settling)
+	G4 P1 ;; wait for Pxx seconds
 	
 	;; roughing cut(s)
 	
@@ -227,16 +253,17 @@ sub cycle_OD_turning_parameters
 	;; #1402 = 20 ;; diameter A
 	;; #1403 = 10 ;; diameter B
 	;; #1404 = 0.75 ;; Depth of cut
-	;; #1405 = 0.4 ;; Finish amount
+	;; #1405 = 0.4 ;; Finish amount diameter
 	;; #1406 = 150 ;; Vc, cutting speed [m/min]
 	;; #1407 = 0.1 ;; F, feed per rev [mm/rev]
 	;; #1408 = 2 ;; Z clearance
 	;; #1409 = 0.5 ;; retract amount
 	;; #1413 = 3000 ;; max spindle speed
+	;; #1415 = 0.05 ;; Finish amount face
 	
 	;; dialog with picture
 	
-	dlgmsg "simple_turning" "Z1" 1400 "Z2" 1401 "diameter A" 1402 "diameter B" 1403 "DOC" 1404 "finish amount" 1405 "Vc [m/min]" 1406 "F [mm/rev]" 1407 "Z clearance" 1408 "retract amount" 1409 "max spindle speed [rpm]" 1413
+	dlgmsg "simple_turning" "Z1" 1400 "Z2" 1401 "diameter A" 1402 "diameter B" 1403 "DOC" 1404 "finish amount diameter" 1405 "finish amount face" 1415 "Vc [m/min]" 1406 "F [mm/rev]" 1407 "Z clearance" 1408 "retract amount" 1409 "max spindle speed [rpm]" 1413
 	
 	if [#5398 == -1] ;; dialog canceled
 		M30
@@ -310,7 +337,7 @@ sub cycle_OD_turning
 				#1414 = #1413
 			endif
 			msg "spindle RPM:"#1414
-			G1 Z[#1401 + #1405] F[#1414 * #1407] ;; cut and calculate feedrate in mm/min --> workaround for edingCNC "bug" where feedoverride does not work icm with G95 and G96 active
+			G1 Z[#1401 + #1415] F[#1414 * #1407] ;; cut and calculate feedrate in mm/min --> workaround for edingCNC "bug" where feedoverride does not work icm with G95 and G96 active
 			G1 X[#5001 + #1409] ;; retract X
 			G0 Z[#1400 + #1408] ;; rapid Z to clearance
 			#1412 = #1411 ;; update last cut diameter
@@ -327,7 +354,7 @@ sub cycle_OD_turning
 				#1414 = #1413
 			endif
 			msg "spindle RPM:"#1414
-			G1 Z[#1401 + #1405] F[#1414 * #1407] ;; cut
+			G1 Z[#1401 + #1415] F[#1414 * #1407] ;; cut
 			G1 X[#5001 + #1409] ;; retract X
 			G0 Z[#1400 + #1408] ;; rapid Z to clearance
 			#1410 = 1 ;; roughing completed
@@ -579,16 +606,17 @@ sub cycle_ID_turning_parameters
 	;; #1602 = 8 ;; diameter A
 	;; #1603 = 12 ;; diameter B
 	;; #1604 = 0.2 ;; Depth of cut
-	;; #1605 = 0.1 ;; Finish amount
+	;; #1605 = 0.1 ;; Finish amount diameter
 	;; #1606 = 150 ;; Vc, cutting speed [m/min]
 	;; #1607 = 0.1 ;; F, feed per rev [mm/rev]
 	;; #1608 = 2 ;; Z clearance
 	;; #1609 = 0.5 ;; retract amount
 	;; #1610 = 3000 ;; max spindle speed
+	;; #1615 = 0.05 ;; Finish amount wall
 
 	;; dialog with picture
 	
-	dlgmsg "dialog_ID_turning" "Z1" 1600 "Z2" 1601 "diameter A" 1602 "diameter B" 1603 "DOC" 1604 "finish amount" 1605 "Vc [m/min]" 1606 "F [mm/rev]" 1607 "Z clearance" 1608 "retract amount" 1609 "max spindle speed [rpm]" 1610
+	dlgmsg "dialog_ID_turning" "Z1" 1600 "Z2" 1601 "diameter A" 1602 "diameter B" 1603 "DOC" 1604 "finish amount diameter" 1605 "Finish amount wall" 1615 "Vc [m/min]" 1606 "F [mm/rev]" 1607 "Z clearance" 1608 "retract amount" 1609 "max spindle speed [rpm]" 1610
 	
 	if [#5398 == -1] ;; dialog canceled
 		M30
@@ -618,6 +646,11 @@ sub cycle_ID_turning_parameters
 		errmsg "DOC cannot be negative or equal to 0"
 	endif
 	
+	;; check if current Z position clears starting Z position
+	if [#5003 < #1600] ;; current Z position smaller than starting position
+		errmsg "Current Z-position smaller than starting position"
+	endif
+	
 	;; parameters verified, go to ID turning cycle
 	gosub cycle_ID_turning
 	
@@ -633,8 +666,11 @@ sub cycle_ID_turning
 	;; goto safety position
 	G0 X[#1602 + #1604] Z[#1600 + #1608]
 	
+	;; take absolute value of max spindle speed, negative setting not allowed for G96
+	#1610 = ABS[#1610]
+	
 	;; enable spindle
-	if [#1610 == 0]
+	if [#1610 == 0] ;; run G96 at max machine set spindle speed
 		if [#1606 < 0]
 			#1606 = [#1606 * -1] ;; negative cutting speed not allowed, use this for M4 (CCW) enable
 			M4 G96 S#1606
@@ -644,14 +680,14 @@ sub cycle_ID_turning
 			M3 G96 S#1606 ;; max spindle speed = max spindle speed of machine
 		endif 
 
-	else	
+	else ;; run G96 at limit speed from dialog
 		if [#1606 < 0]
 			#1606 = [#1606 * -1] ;; negative cutting speed not allowed, use this for M4 (CCW) enable
 			M4 G96 S#1606 D#1610
 			
 		else
 			;; turn CW
-			M3 G96 S#1606 D#1610 
+			M3 G96 S#1606 D#1610
 		endif 
 		
 	endif
@@ -672,7 +708,7 @@ sub cycle_ID_turning
 			if [#1614 > #1610] ;; check if calculated RPM is less than set max rpm
 				#1614 = #1610
 			endif
-			G1 Z[#1601 + #1605] F[#1614 * #1607] ;; cut and calculate feedrate in mm/min --> workaround for edingCNC "bug" where feedoverride does not work icm with G95 and G96 active
+			G1 Z[#1601 + #1615] F[#1614 * #1607] ;; cut and calculate feedrate in mm/min --> workaround for edingCNC "bug" where feedoverride does not work icm with G95 and G96 active
 			;;G1 Z[#1601 + #1605] F100 ;; cut and calculate feedrate in mm/min --> workaround for edingCNC "bug" where feedoverride does not work icm with G95 and G96 active
 			G1 X[#5001 - #1609] ;; retract X
 			G0 Z[#1600 + #1608] ;; rapid Z to clearance
@@ -689,7 +725,7 @@ sub cycle_ID_turning
 			if [#1614 > #1610] ;; check if calculated RPM is less than set max rpm
 				#1614 = #1610
 			endif
-			G1 Z[#1601 + #1605] F[#1614 * #1607] ;; cut
+			G1 Z[#1601 + #1615] F[#1614 * #1607] ;; cut
 			;;G1 Z[#1601 + #1605] F100 ;; cut
 			G1 X[#5001 - #1609] ;; retract X
 			G0 Z[#1600 + #1608] ;; rapid Z to clearance
