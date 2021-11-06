@@ -309,44 +309,28 @@ Sub user_12
 Endsub
 
 Sub user_13
-    gosub cycle_ID_turning_parameters
+    gosub cycle_OD_turning_chamfer_parameters
 Endsub
 
 Sub user_14
-	gosub cycle_drilling_parameters
+    gosub cycle_ID_turning_parameters
 Endsub
 
 Sub user_15
-    gosub cycle_external_threading_parameters
+	gosub cycle_drilling_parameters
 Endsub
 
 Sub user_16
-	gosub cycle_internal_threading_parameters
+    gosub cycle_external_threading_parameters
 Endsub
 
 Sub user_17
-    gosub cycle_parting_off_parameters
+	gosub cycle_internal_threading_parameters
 Endsub
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Sub user_18
+    gosub cycle_parting_off_parameters
+Endsub
 
 
 ;Homing per axis

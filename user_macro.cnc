@@ -1,4 +1,10 @@
-;user macro
+; user macro for Emcoturn 120
+; -----------------------------------------------------------
+; Author: 	Koen Gerrits
+; E-mail: 	kgerrits@live.nl
+; Version: 	0.1
+; Date: 	06/11/2021
+; -----------------------------------------------------------
 
 sub set_default_cycle_parameters
 	;; sets all parameters related to turning cycles to default value
@@ -38,7 +44,7 @@ sub set_default_cycle_parameters
 	#1454 = [#5009 * 2] ;; drill diameter (Actual tool diameter)
 	#1455 = 2 ;; Z clearance
 	#1456 = 2 ;; peck depth (0 = no pecking)
-	;;#1457 = 0.2 ;; retract value
+	#1457 = 0.2 ;; retract value
 	#1458 = 0 ;; full retract (0 = no, 1 = yes)
 	#1459 = 70 ;; Vc
 	#1460 = 0.05 ;; fn [mm/rev]
@@ -171,17 +177,20 @@ sub cycle_facing_parameters
 		errmsg "Clearance value must be positive."
 	endif
 	
+	;; set feed override to 0% so macro does not start immediately
+	M48 ;; enable feed and speed override
+	M50 P0 ;; feed override to 0%.
+	
 	;; parameters verified, go to facing cycle
 	gosub cycle_facing
+	
+	gosub end_macro
 	
 endsub
 
 sub cycle_facing
-	
 	;; turning routine
 	;; -------------------------------------------------------------
-	M48 ;; enable feed and speed override
-	M50 P0 ;; feed override to 0%. Macro does not start immediately
 
 	;; goto safety position
 	G0 X[#1502 + #1509] Z[#1500 + #1508]
@@ -212,10 +221,8 @@ sub cycle_facing
 		
 	endif
 	
-	
-	
 	;; wait for spindle to ramp up (#5070 settling)
-	G4 P1 ;; wait for Pxx seconds
+	G4 P1.5 ;; wait for Pxx seconds
 	
 	;; roughing cut(s)
 	
@@ -255,89 +262,7 @@ sub cycle_facing
 	;; end macro
 	M9 ;; stop cooling
 	M5 ;; stop spindle
-	G30 ;; go to safe/home position
-	M30 ;; end program
-	
-endsub
 
-sub cycle_auto_facing
-	
-	;; turning routine
-	;; -------------------------------------------------------------
-
-	;; goto safety position
-	G0 X[#1502 + #1509] Z[#1500 + #1508]
-	
-	;; overwrite max spindle speed
-	#1513 = ABS[#1513] ;; max spindle speed not accepted as negative parameter
-	
-	;; enable spindle
-	if [#1513 == 0] ;; run G96 at max machine set spindle speed
-		if [#1506 < 0]
-			#1506 = [#1506 * -1] ;; negative cutting speed not allowed, use this for M4 (CCW) enable
-			M4 G96 S#1506
-			
-		else
-			;; turn CW
-			M3 G96 S#1506 ;; max spindle speed = max spindle speed of machine
-		endif 
-
-	else ;; run G96 at limit speed from dialog
-		if [#1506 < 0]
-			#1506 = [#1506 * -1] ;; negative cutting speed not allowed, use this for M4 (CCW) enable
-			M4 G96 S#1506 D#1513
-			
-		else
-			;; turn CW
-			M3 G96 S#1506 D#1513
-		endif 
-		
-	endif
-	
-	
-	
-	;; wait for spindle to ramp up (#5070 settling)
-	G4 P1 ;; wait for Pxx seconds
-	
-	;; roughing cut(s)
-	
-	#1510 = 0 ;; roughing complete flag
-	#1511 = [#1500 - #1504] ;; desired cutting depth (Z distance)
-	#1512 = #1500 ;; last cut Z face value
-	
-	while [#1510 < 1] ;; roughing not completed
-	
-		if [#1511 > [#1501+#1505]] ;; perform roughing cut if desired cutting depth greater than final depth + finish amount
-			G0 Z#1511
-			G1 X#1503 F#1507
-			#1512 = #1511 ;; update last Z faced value
-			G91 G0 Z0.5 ;; retract in incremental mode
-			G90 G0 X[#1502 + #1509] ;; rapid to clearance diameter in absolute mode
-			#1511 = [#1512 - #1504] ;; calculate new desired cutting depth (Z distance)
-		endif
-		
-		if [#1511 <= [#1501+#1505]] ;; perform final roughing cut to desired finish amount
-			G0 Z[#1501 + #1505]
-			G1 X#1503 F#1507
-			G91 G0 Z0.5 ;; retract in incremental mode
-			G90 G0 X[#1502 + #1509] ;; rapid to clearance diameter in absolute mode
-			#1510 = 1 ;; set roughing complete flag
-			msg "roughing passes completed"
-		endif
-	endwhile
-	
-	;; finish cut
-	G0 Z[#1501]
-	G1 X#1503 F#1507
-	G91 G0 Z0.5 ;; retract in incremental mode
-	G90 G0 X[#1502 + #1509] ;; rapid to clearance diameter in absolute mode
-
-	msg "finish cut completed"
-	
-	;; end macro
-	M9 ;; stop cooling
-	M5 ;; stop spindle
-		
 endsub
 
 sub cycle_OD_turning_parameters
@@ -360,16 +285,12 @@ sub cycle_OD_turning_parameters
 	
 	;; dialog with picture
 	
-	dlgmsg "simple_turning" "Z1" 1400 "Z2" 1401 "diameter A" 1402 "diameter B" 1403 "DOC" 1404 "finish amount diameter" 1405 "finish amount face" 1415 "Vc [m/min]" 1406 "F [mm/rev]" 1407 "Z clearance" 1408 "retract amount" 1409 "max spindle speed [rpm]" 1413
+	dlgmsg "dialog_OD_turning" "Z1" 1400 "Z2" 1401 "diameter A" 1402 "diameter B" 1403 "DOC" 1404 "finish amount diameter" 1405 "finish amount face" 1415 "Vc [m/min]" 1406 "F [mm/rev]" 1407 "Z clearance" 1408 "retract amount" 1409 "max spindle speed [rpm]" 1413
 	
 	if [#5398 == -1] ;; dialog canceled
 		M30
 	endif
-	
-	;; multiply depth of cut and finish alowance by 2: diameter programming
-	#1404 = [2* #1404]
-	#1405 = [2* #1405]
-	
+
 	;; sanity checks
 	;; -------------------------------------------------------------
 	;; TODO: 
@@ -388,18 +309,25 @@ sub cycle_OD_turning_parameters
 		errmsg "DOC cannot be negative or equal to 0"
 	endif
 	
+	;; set feed override to 0% so macro does not start immediately
+	M48 ;; enable feed and speed override
+	M50 P0 ;; feed override to 0%. Macro does not start immediately
+	
 	;; parameters verified, go to OD turning cycle
 	gosub cycle_OD_turning
+	
+	gosub end_macro
 	
 endsub 
 
 sub cycle_OD_turning
-	
 	;; turning routine
 	;; -------------------------------------------------------------
-	M48 ;; enable feed and speed override
-	M50 P0 ;; feed override to 0%. Macro does not start immediately
-
+	
+	;; multiply depth of cut and finish alowance diameter by 2: diameter programming
+	#1404 = [2* #1404]
+	#1405 = [2* #1405]
+	
 	;; goto safety position
 	G0 X#1402 Z[#1400 + #1408]
 	
@@ -477,109 +405,77 @@ sub cycle_OD_turning
 	;; end macro
 	M9 ;; stop cooling
 	M5 ;; stop spindle
-	G30 ;; go to safe position
-	
+
 	;; divide depth of cut and finish alowance by 2: for storing parameters
 	#1404 = [#1404 / 2]
 	#1405 = [#1405 / 2]
-	
-	M30 ;; end program
+
 endsub
 
-sub cycle_auto_OD_turning
+sub cycle_OD_turning_chamfer_parameters
+	;; Outside diameter turning with front chamfer
+	;; -------------------------------------------------------------
 	
+	;; cycle OD turning chamfer parameters
+	;#1750 = 0 ;; Z1
+	;#1751 = -5 ;; Z2
+	;#1752 = 20 ;; diameter A
+	;#1753 = 10 ;; diameter B
+	;#1754 = 45 ;; chamfer angle
+	;#1755 = 1.5 ;; chamfer length
+	;#1756 = 0.75 ;; Depth of cut
+	;#1757 = 0.1 ;; Finish amount
+	;#1758 = 150 ;; Vc, cutting speed [m/min]
+	;#1759 = 0.1 ;; F, feed per rev [mm/rev]
+	;#1760 = 2 ;; Z clearance
+	;#1761 = 0.5 ;; retract amount
+	;#1762 = 3000 ;; max spindle speed
+	;#1763 = 0.05 ;; Finish amount face
+	
+	;; dialog with picture
+	
+	dlgmsg "dialog_OD_turning_chamfer" "Z1" 1750 "Z2" 1751 "diameter A" 1752 "diameter B" 1753 "chamfer angle" 1754 "chamfer length" 1755 "DOC" 1756 "finish amount" 1757 "finish amount face" 1763 "Vc [m/min]" 1758 "F [mm/rev]" 1759 "Z clearance" 1760 "retract amount" 1761 "max spindle speed" 1762
+	
+	if [#5398 == -1] ;; dialog canceled
+		M30
+	endif
+	
+	;; sanity checks
+	;; -------------------------------------------------------------
+	;; TODO: 
+	;; - Z & diameter add allowance to checks
+	;; TODO: check start positions of axes
+	
+	if [#1750 <= #1751] ;; Z1 larger or equal than Z2
+		errmsg "Z2 must be smaller than Z1."
+	endif
+	
+	if [#1753 >= #1752] ;; diameter B larger or equal than diameter A
+		errmsg "Diameter B must be smaller than diameter A."
+	endif
+	
+	if [#1756 <= 0] ;; DOC 0 or negative
+		errmsg "DOC cannot be negative or equal to 0"
+	endif
+	
+	;; set feed override to 0% so macro does not start immediately
+	M48 ;; enable feed and speed override
+	M50 P0 ;; feed override to 0%. Macro does not start immediately
+	
+	;; parameters verified, go to cycle
+	gosub cycle_OD_turning_chamfer
+	
+	gosub end_macro
+	
+endsub 
+
+sub cycle_OD_turning_chamfer
 	;; turning routine
-
-	;; goto safety position
-	G0 X#1402 Z[#1400 + #1408]
+	;; -------------------------------------------------------------
 	
-	;; enable spindle
-	if [#1413 == 0]
-		G96 S#1406 ;; max spindle speed = max spindle speed of machine
-	else
-		G96 S#1406 D#1413
-	endif
-	
-	;; check sign of Vc for spindle directions
-	if [#1406 > 0] ;; turn CW
-		M3
-	else ;; turn CCW
-		M4
-	endif
-	
-	;; wait for spindle to ramp up (#5070 settling)
-	G4 P2 ;; wait for 2 second
-
-	;; roughing
-	#1410 = 0 ;; roughing complete flag
-	#1411 = [#1402 - #1404] ;; desired cutting depth
-	#1412 = #1402 ;; last cut diameter
-	while [#1410 < 1]
-		
-		if [#1411 > [#1403+#1405]] ;; perform cut with full DOC if resulting diameter > final + finish allowance
-			msg "next roughing pass X:"#1411
-			G0 X#1411 ;; x down
-			#1414 = [[#1406 * 1000] / [3.14159 * #1411]] ;; rpm calculation
-			if [#1414 > #1413] ; check if calculated rpm is less than max set rpm
-				#1414 = #1413
-			endif
-			msg "spindle RPM:"#1414
-			G1 Z[#1401 + #1415] F[#1414 * #1407] ;; cut and calculate feedrate in mm/min --> workaround for edingCNC "bug" where feedoverride does not work icm with G95 and G96 active
-			G1 X[#5001 + #1409] ;; retract X
-			G0 Z[#1400 + #1408] ;; rapid Z to clearance
-			#1412 = #1411 ;; update last cut diameter
-			msg "roughing pass at X:"#1412
-			#1411 = [#1412 - #1404] ;; calculate new desired diameter to cut
-			
-		endif
-
-		if [#1411 <= [#1403 + #1405] ] ;; perform cut up to finish allowance diameter
-			msg "next roughing pass X:"[#1403 + #1405]
-			G0 X[#1403 + #1405] ;; x down to final diameter + finish amount
-			#1414 = [[#1406 * 1000] / [3.14159 * [#1403 + #1405]]] ;; rpm calculation
-			if [#1414 > #1413] ; check if calculated rpm is less than max set rpm
-				#1414 = #1413
-			endif
-			msg "spindle RPM:"#1414
-			G1 Z[#1401 + #1415] F[#1414 * #1407] ;; cut
-			G1 X[#5001 + #1409] ;; retract X
-			G0 Z[#1400 + #1408] ;; rapid Z to clearance
-			#1410 = 1 ;; roughing completed
-			msg "roughing passes completed"
-		
-		endif
-		
-	endwhile
-	
-	;; finish pass
-	msg "Finishing pass X:"#1403
-	G0 X[#1403] ;; x down to final diameter + finish amount
-	#1414 = [[#1406 * 1000] / [3.14159 * #1403]] ;; rpm calculation
-	if [#1414 > #1413] ; check if calculated rpm is less than max set rpm
-		#1414 = #1413
-	endif
-	msg "spindle RPM:"#1414
-	G1 Z[#1401] F[#1414 * #1407] ;; cut
-	G1 X[#1402 + #1409] ;; cut backface to start diameter + retract amount
-	G0 Z[#1400 + #1408] ;; rapid Z to clearance
-	msg "finish pass completed"
-	
-		;; end macro
-	M9 ;; stop cooling
-	M5 ;; stop spindle
-	
-	;; divide depth of cut and finish alowance by 2: for storing parameters
-	#1404 = [#1404 / 2]
-	#1405 = [#1405 / 2]
-
-endsub
-
-
-sub cycle_auto_OD_turning_chamfer
-;; multiply depth of cut and finish alowance by 2: diameter programming
+	;; multiply depth of cut and finish alowance by 2: diameter programming
 	#1756 = [2* #1756]
 	#1757 = [2* #1757]
-	
 	
 	;; start cycle
 	;; goto safety position
@@ -706,11 +602,11 @@ sub cycle_auto_OD_turning_chamfer
 	msg "spindle RPM:"#1767
 	
 	G1 Z[#1751] F[#1767 * #1759] ;; cut
-	G1 X[#1752 + #761] ;; cut backface to start diameter + retract amount
-	G0 Z[#1750 + #760] ;; rapid Z to clearance
+	G1 X[#1752 + #1761] ;; cut backface to start diameter + retract amount
+	G0 Z[#1750 + #1760] ;; rapid Z to clearance
 	msg "finish pass completed"
 	
-	;; end macro
+	;; end of cycle
 	M9 ;; stop cooling
 	M5 ;; stop spindle
 	
@@ -728,7 +624,7 @@ sub cycle_drilling_parameters
 	;;#1451 = -5 ;; Z2
 	;;#1452 = 1 ;; include tip (0 = no, 1 = yes)
 	;;#1453 = 118 ;; tip angle
-	#1454 = [#5009 * 2] ;; drill diameter (Actual tool diameter)
+	#1454 = [#5009 * 2] ;; drill diameter --> (Take tool diameter from tool table)
 	;;#1455 = 2 ;; Z clearance
 	;;#1456 = 2 ;; peck depth (0 = no pecking)
 	;;#1457 = 0.2 ;; retract value
@@ -739,22 +635,29 @@ sub cycle_drilling_parameters
 
 	;; dialog with picture
 	
-	dlgmsg "drilling" "Z1" 1450 "Z2" 1451 "tip include" 1452 "tip angle" 1453 "diameter" 1454 "Z clearance" 1455 "peck depth" 1456 "full retract" 1458 "Vc [m/min]" 1459 "feed [mm/rev]" 1460
+	dlgmsg "dialog_drilling" "Z1" 1450 "Z2" 1451 "tip include" 1452 "tip angle" 1453 "diameter" 1454 "Z clearance" 1455 "peck depth" 1456 "retract amount" 1457 "full retract" 1458 "Vc [m/min]" 1459 "feed [mm/rev]" 1460
 	
 	if [#5398 == -1] ;; dialog canceled
 		M30
 	endif
 	
-	#1457 = [#1450 + #1455]
+	;;#1457 = [#1450 + #1455]
 	
 	;; sanity checks
 	;; -------------------------------------------------------------
 	;; TODO:
 	;; check start positions of axes
 	;; retract value > Z2
+	
+	
+	;; set feed override to 0% so macro does not start immediately
+	M48 ;; enable feed and speed override
+	M50 P0 ;; feed override to 0%. Macro does not start immediately
 
 	;; parameters verified, go to OD turning cycle
 	gosub cycle_drilling
+	
+	gosub end_macro
 
 endsub
 
@@ -772,16 +675,8 @@ sub cycle_drilling
 	msg "drill tip extension amount:" #1463 
 	
 
-	;; -------------------------------------------------------------
-	M48 ;; enable feed and speed override
-	M50 P0 ;; feed override to 0%. Macro does not start immediately
-	
-	;; move to home
-	G28
-	
 	;; move to Z clearance position
-	G0 X0
-	G0 Z[#1450 + #1455]
+	G0 X0 Z[#1450 + #1455]
 	
 	;; start spindle
 	;; limit speed to 4000 RPM
@@ -851,102 +746,6 @@ sub cycle_drilling
 
 	M9 ;; stop cooling
 	M5 ;; stop spindle
-	G0 G53 Z#5123 ;; go to Z home
-	G30 ;; go to safe position
-	M30 ;; end program
-	
-
-endsub
-
-sub cycle_auto_drilling
-	
-	;; Calculate parameters
-	;; spinde speed
-	#1461 = [[#1459*1000] / [3.14159 * #1454]] ;; n = Vc*1000/pi*D
-	msg "drill RPM:" #1461
-	;; cutting speed
-	#1462 = [#1460 * #1461]
-	msg "drill feed mm/min:" #1462
-	;; full diameter Z-extension
-	#1463 = [[#1454 / 2] / TAN[#1453 / 2]]
-	msg "drill tip extension amount:" #1463 
-	
-	;; move to home
-	G30
-	
-	;; move to Z clearance position
-	G0 X0
-	G0 Z[#1450 + #1455]
-	
-	;; start spindle
-	;; limit speed to 4000 RPM
-	if [#1461 > 3000]
-		G97 S3000
-	else
-		G97 S#1461
-	endif
-
-	M4 ;; spindle CCW for drilling
-	
-	;; determine drilling cycle
-	if [#1456 == 0] ;; full depth drilling
-		msg "full depth drilling"
-		
-		if [#1452 == 0] ;; full diameter drilling --> extend Z2 with tip extension
-		
-			G1 Z[#1451-#1463] F#1462
-			G4 P0.1 ;; dwell for 0.1 to get flat bottom 
-			G91 G1 Z#1457 ;; retract with feed in incremental mode
-			G90 G0 Z[#1450 + #1455] ;; rapid to safe position 
-		else
-			G1 Z#1451 F#1462
-			G4 P0.1 ;; dwell for 0.1 to get flat bottom 
-			G91 G1 Z#1457 ;; retract with feed in incremental mode
-			G90 G0 Z[#1450 + #1455] ;; rapid to safe position 
-		endif
-		
-	endif
-	
-	if [[#1456 > 0] and [#1458 == 0]] ;; standard pecking
-		msg "standard pecking"
-		
-		if [#1452 == 0] ;; full diameter drilling --> extend Z2 with tip extension
-
-			G17 ;; switch plane --> G18 creates bug function error message in Eding CNC
-			G73 X0 Z[#1451-#1463] R#1457 Q#1456 F#1462
-			G18 ;; switch back to XZ plane
-			G0 Z[#1450 + #1455] ;; rapid to safe position 
-		else
-			G17 ;; switch plane --> G18 creates bug function error message in Eding CNC
-			G73 X0 Z#1451 R#1457 Q#1456 F#1462
-			G18 ;; switch back to XZ plane
-			G0 Z[#1450 + #1455] ;; rapid to safe position 
-		endif
-	endif
-	
-	if [[#1456 > 0] and [#1458 == 1]] ;; full retract pecking
-		msg "full retract pecking"
-		
-		if [#1452 == 0] ;; full diameter drilling --> extend Z2 with tip extension
-		
-			G17 ;; switch plane --> G18 creates bug function error message in Eding CNC
-			G83 X0 Y0 Z[#1451-#1463] R#1457 Q#1456 F#1462
-			G18 ;; switch back to XZ plane
-			G0 Z[#1450 + #1455] ;; rapid to safe position 
-
-		else
-			G17 ;; switch plane --> G18 creates bug function error message in Eding CNC
-			G83 X0 Y0 Z#1451 R#1457 Q#1456 F#1462
-			G18 ;; switch back to XZ plane
-			G0 Z[#1450 + #1455] ;; rapid to safe position 
-			
-		endif
-		
-	endif
-	
-	M9 ;; stop cooling
-	M5 ;; stop spindle
-	G0 G53 Z#5123 ;; go to Z home
 	
 endsub
 
@@ -1074,8 +873,14 @@ sub cycle_external_threading_parameters
 		errmsg "Invalid thread size and pitch combination"
 	endif
 	
+	;; set feed override to 0% so macro does not start immediately
+	M48 ;; enable feed and speed override
+	M50 P0 ;; feed override to 0%. Macro does not start immediately
+	
 	;; parameters verified, go to external threading cycle
 	gosub cycle_external_threading
+	
+	gosub end_macro
 	
 endsub
 
@@ -1094,8 +899,6 @@ sub cycle_external_threading
 		G97 S[-1*#1556] M3 ;; turn spindle CW (left hand thread)
 	endif
 	
-	M48 ;; enable feed and speed override
-	M50 P0 ;; feed override to 0%. Macro does not start immediately
 
     ;; goto thread start position
 	G0 X#1552 Z#1550
@@ -1106,8 +909,11 @@ sub cycle_external_threading
     ;; end macro
 	M9 ;; stop cooling
 	M5 ;; stop spindle
-	G30 ;; go to safe position
-	M30 ;; end program
+	
+	
+	;; move to thread start position + clearance
+	
+	G0 X[#1552+2] Z[#1550+2]
 
 endsub
 
@@ -1166,8 +972,14 @@ sub cycle_ID_turning_parameters
 		errmsg "Current Z-position smaller than starting position"
 	endif
 	
+	;; set feed override to 0% so macro does not start immediately
+	M48 ;; enable feed and speed override
+	M50 P0 ;; feed override to 0%. Macro does not start immediately
+	
 	;; parameters verified, go to ID turning cycle
 	gosub cycle_ID_turning
+
+	gosub end_macro
 	
 endsub 
 
@@ -1175,8 +987,6 @@ sub cycle_ID_turning
 
     ;; turning routine
 	;; -------------------------------------------------------------
-	M48 ;; enable feed and speed override
-	M50 P0 ;; feed override to 0%. Macro does not start immediately
 
 	;; goto safety position
 	G0 X[#1602 + #1604] Z[#1600 + #1608]
@@ -1271,14 +1081,10 @@ sub cycle_ID_turning
 	;; end macro
 	M9 ;; stop cooling
 	M5 ;; stop spindle
-	G0 G53 Z#5123 ;; go to Z home
-	G30 ;; go to safe position
 	
 	;; divide depth of cut and finish alowance by 2: for storing parameters
 	#1604 = [#1604 / 2]
 	#1605 = [#1605 / 2]
-	
-	M30 ;; end program
 
 endsub
 
@@ -1317,73 +1123,18 @@ sub cycle_parting_off_parameters
 		errmsg "spindle speed must be larger than 0"
 	endif
 	
+	;; set feed override to 0% so macro does not start immediately
+	M48 ;; enable feed and speed override
+	M50 P0 ;; feed override to 0%. Macro does not start immediately
+	
 	;; parameters verified, go to parting off cycle
 	gosub cycle_parting_off
+	
+	gosub end_macro
 	
 endsub
 
 sub cycle_parting_off
-
-    ;; parting off routine
-	;; -------------------------------------------------------------
-
-    ;; enable spindle
-	G97 S#1655 M3
-	
-	M48 ;; enable feed and speed override
-	M50 P0 ;; feed override to 0%. Macro does not start immediately
-
-    if [#1656 == 0] ;; no pecking
-
-        G0 Z[#1650 - #1653] ;; rapid to Z-position
-        G0 X[#1651 + #1662] ;; rapid down to start diameter + clearance
-        G1 X[#1652] G95 F#1654 ;; feed per rev
-        G4 P#1658
-        G0 X[#1651 + #1662] ;; rapid up to start diameter + clearance
-
-    else ;; pecking cycle
-
-        G0 Z[#1650 - #1653] ;; rapid to Z-position
-        G0 X[#1651 + #1662] ;; rapid down to start diameter + clearance
-
-        #1659 = 0 ;; pecking cycle complete flag
-        #1660 = [#1651 - #1656] ;; desired cutting depth
-        #1661 = #1651 ;; last cutting depth
-
-        while [#1659 == 0]
-
-            if [#1660 > #1652] ;; do pecking
-
-                G1 X[#1660] G95 F#1654 ;; feed per rev
-                G0 X[#1660 + #1657] ;; retract
-                G4 P#1658 ;; dwell
-
-                #1661 = #1660 ;; update last cut diameter
-                #1660 = [#1661 - #1656] ;; calculate new desired cutting depth
-
-            else ;; last cut to final diameter
-
-                G1 X[#1652] G95 F#1654 ;; feed per rev
-                G4 P#1658 ;; dwell
-                #1659 = 1; 
-            endif
-
-        endwhile
-
-    G0 X[#1651 + #1662] ;; rapid up to start diameter + clearance
-
-    endif
-
-	;; end macro
-    G94 ;; back to feed in mm/min mode
-	M9 ;; stop cooling
-	M5 ;; stop spindle
-	G30 ;; go to safe position
-	M30 ;; end program
-
-endsub
-
-sub cycle_auto_parting_off
 
     ;; parting off routine
 	;; -------------------------------------------------------------
@@ -1564,12 +1315,17 @@ sub cycle_internal_threading_parameters
 		errmsg "Invalid thread size and pitch combination"
 	endif
 
-
     ;; calculate threading parameters
     #1707 = [[#1702 - #1703]/2] ;; full thread depth beyond thread peak
+	
+	;; set feed override to 0% so macro does not start immediately
+	M48 ;; enable feed and speed override
+	M50 P0 ;; feed override to 0%. Macro does not start immediately
 
 	;; parameters verified, go to internal threading cycle
 	gosub cycle_internal_threading
+	
+	gosub end_macro
 
 endsub
 
@@ -1585,9 +1341,6 @@ Sub cycle_internal_threading
 		G97 S[-1*#1706] M3 ;; turn spindle CW (left hand thread)
 	endif
 	
-	M48 ;; enable feed and speed override
-	M50 P0 ;; feed override to 0%. Macro does not start immediately
-
     ;; goto thread start position
 	G0 X[#1703-#1704] Z#1700
 
@@ -1599,8 +1352,7 @@ Sub cycle_internal_threading
     ;; end macro
 	M9 ;; stop cooling
 	M5 ;; stop spindle
-	G30 ;; go to safe position
-	M30 ;; end program
+
 endsub
 
 sub cycle_OD_turning_chamfer_radius
@@ -1641,8 +1393,16 @@ sub cycle_OD_turning_chamfer_radius
 	else
 	; stair down roughing with corner radius
 	
-	
 	endif
 
+endsub
+
+sub end_macro
+
+	M9 ;; stop cooling
+	M3 ;; --> M4 stopped spindle in position control, M3 free rotating --> need to fix in spindle drive setting
+	M5 ;; stop spindle
+	G30 ;; go to safe position
+	M30 ;; end program
 
 endsub
