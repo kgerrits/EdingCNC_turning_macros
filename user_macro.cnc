@@ -110,6 +110,21 @@ sub set_default_cycle_parameters
 	#1762 = 3000 ;; max spindle speed
 	#1763 = 0.05 ;; Finish amount face
 	
+	;; cycle groove turning parameters
+	#1800 = -2 ;; Z1
+	#1801 = -10 ;; Z2
+	#1802 = 20 ;; X1
+	#1803 = 10 ;; X2
+	#1804 = 2.5 ;; tool width
+	#1805 = 0.05 ;; Z allowance
+	#1806 = 0.1 ;; X allowance
+	#2001 = 150 ;; Vc, cutting speed [m/min]
+	#1808 = 200 ;; F, cutting feed [mm/min]
+	#1809 = 2 ;; Z safety
+	#1810 = 22 ;; X safety
+	#2002 = 3000 ;; max spindle speed
+	#1807 = 0.2 ;; pass overlap
+	
 	msg "default cycle parameters set"
 
 endsub
@@ -1355,6 +1370,112 @@ Sub cycle_internal_threading
 
 endsub
 
+sub cycle_groove_turning_parameters
+
+	;; cycle groove turning parameters
+	#1800 = -2 ;; Z1
+	#1801 = -10 ;; Z2
+	#1802 = 20 ;; X1
+	#1803 = 10 ;; X2
+	#1804 = 2.5 ;; tool width
+	#1805 = 0.05 ;; Z allowance
+	#1806 = 0.1 ;; X allowance
+	#2001 = 150 ;; Vc, cutting speed [m/min]
+	#1808 = 200 ;; F, cutting feed [mm/min]
+	#1809 = 2 ;; Z safety
+	#1810 = 22 ;; X safety
+	#2002 = 3000 ;; max spindle speed
+	#1807 = 0.2 ;; pass overlap
+	
+	;; dialog with picture
+	
+	dlgmsg "dialog_groove_turning" "Z1" 1800 "Z2" 1801 "X1" 1802 "X2" 1803 "tool width" 1804 "Z allowance" 1805 "X allowance" 1806 "Vc [m/min]" 2001 "F [mm/min]" 1808 "Z safety" 1809 "X safety" 1810 "max spindle RPM" 2002 "pass overlap" 1807
+	
+	if [#5398 == -1] ;; dialog canceled
+		M30
+	endif
+
+	;; Sanity checks
+	if [#1800 <= #1801] ;; Z1 larger or equal than Z2
+		errmsg "Z2 must be smaller than Z1."
+	endif
+	
+	if [#1802 < #1803] ;; X1 larger than diameter X2
+		errmsg "Diameter X1 must be larger than diameter X2."
+	endif
+	
+	;; check if current Z position clears starting Z position
+	if [#5003 < #1809] ;; current Z position smaller than starting position
+		errmsg "Current Z-position smaller than safety position"
+	endif
+	
+	;; check if current X position clears starting Z position
+	if [#5001 < #1810] ;; current Z position smaller than starting position
+		errmsg "Current X-position smaller than safety position"
+	endif
+	
+	;; set feed override to 0% so macro does not start immediately
+	M48 ;; enable feed and speed override
+	M50 P0 ;; feed override to 0%. Macro does not start immediately
+	
+	;; parameters verified, go to cycle
+	gosub cycle_groove_turning
+	
+	gosub end_macro
+
+endsub
+
+sub cycle_groove_turning
+	;; turning routine
+
+	;; goto safety position
+	G0 X[#1810] Z[#1809]
+
+	gosub start_spindle_constant_cutting_speed ;; enable spindle constant cutting speed
+
+	; -------------------------------------------------------------
+	;; roughing cut(s)
+	#1811 = 0 ; roughing complete flag
+	#1812 = [#1800 - #1804 - #1805] ; desired Z grooving distance (Z1 - toolwidth - Z allowance)
+
+	#1814 = [#1801 + #1805] ; maximum roughing Z value
+	#1815 = [#1803 + #1806] ; roughing diameter
+
+	while [#1811 < 1] ;; while roughing not completed
+
+		if [#1812 > #1814] ;; perform rough cut if cutting depth is greater than final depth + allowance
+			G0 Z#1812
+			G1 X#1815 F#1808 ;; feed to roughing depth
+			G0 X[#1802 + 0.5] ;; rapid retract
+			#1813 = #1812 ; last Z-value of grooving passes
+			#1812 = [#1813-#1804+#1807] ; new desired grooving Z value (last value - tool width + overlap)
+		endif
+		
+		if [#1812 <= #1814] ;; perform final roughing step at maximum Z value
+			G0 Z#1814
+			G1 X#1815 F#1808 ;; feed to roughing depth
+			G0 X[#1802 + 0.5] ;; rapid retract
+			#1811 = 1 ; roughing complete flag
+			msg "roughing passes completed"
+		endif
+		
+	endwhile
+
+	; -------------------------------------------------------------
+	;; finish pass (peck at both end, finish turn middle section
+	G0 Z[#1801] ;; rapid to Z end
+	G1 X#1803 F#1808 ;; feed to finishing diameter
+	G0 X[#1802 + 0.5] ;; rapid retract
+
+	G0 Z[#1800 - #1804] ;; rapid to Z start - toolwidth
+	G1 X#1803 F#1808 ;; feed to finishing diameter
+	G1 Z#1801  ;; feed to finishing depth
+	G1 X[#1802 + 0.5] ;; feed retract
+	G0 X[#1810] Z[#1809];; rapid to safety position
+
+endsub
+
+
 sub cycle_OD_turning_chamfer_radius
 
 	;; outside diameter turning macro with corner radius and chamfer
@@ -1394,6 +1515,35 @@ sub cycle_OD_turning_chamfer_radius
 	; stair down roughing with corner radius
 	
 	endif
+
+endsub
+
+sub start_spindle_constant_cutting_speed
+;; starts spindle with G96 constant surface speed
+;; #2001 = cutting speed in [m/s]
+;; #2002 = maximum spindle speed --> if #2002 == 0, maximum of machine is used
+
+;check if max RPM limit is set
+if [#2002 > 0] ;; enable spindle with set maximum RPM
+
+	if [#2001 < 0] ;; CCW
+		M4 G96 S[ABS[#2001]] D#2002 
+	else ;; CW
+		M3 G96 S#2001 D#2002 
+	endif
+	
+else ;; enable spindle with machine maximum RPM
+
+	if [#2001 < 0] ;; CCW
+		M4 G96 S[ABS[#2001]] 
+	else ;; CW
+		M3 G96 S#2001 
+	endif
+	
+endif	
+
+	;; wait for spindle to ramp up (#5070 settling)
+	;;G4 P1.5 ;; wait for Pxx seconds
 
 endsub
 

@@ -332,6 +332,9 @@ Sub user_18
     gosub cycle_parting_off_parameters
 Endsub
 
+Sub user_19
+    gosub cycle_groove_turning_parameters
+Endsub
 
 ;Homing per axis
 Sub home_x
