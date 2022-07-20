@@ -2,8 +2,8 @@
 ; -----------------------------------------------------------
 ; Author: 	Koen Gerrits
 ; E-mail: 	kgerrits@live.nl
-; Version: 	0.1
-; Date: 	06/11/2021
+; Version: 	0.2
+; Date: 	20/07/2022
 ; -----------------------------------------------------------
 
 sub set_default_cycle_parameters
@@ -57,6 +57,7 @@ sub set_default_cycle_parameters
 	#1554 = 1.00 ;; Pitch
 	#1555 = 0.08 ;; depth per pass
 	#1556 = 800 ;; spindle speed [rev/min] | negative for left hand threads
+	#1558 = 1	;; number of spring passes
 	
 	;; cycle ID turning
 	#1600 = 0 ;; Z1
@@ -93,6 +94,7 @@ sub set_default_cycle_parameters
 	#1705 = 0.08 ;; depth per pass
 	#1706 = 800 ;; spindle speed [rev/min] | negative for left hand threads
 	#1708 = 2 ;; Z clearance
+	#1709 = 1 ;; spring passes
 	
 	;; cycle OD turning chamfer parameters
 	#1750 = 0 ;; Z1
@@ -109,6 +111,7 @@ sub set_default_cycle_parameters
 	#1761 = 0.5 ;; retract amount
 	#1762 = 3000 ;; max spindle speed
 	#1763 = 0.05 ;; Finish amount face
+	#1772 = 0.4 ;; Tool nose radius
 	
 	;; cycle groove turning parameters
 	#1800 = -2 ;; Z1
@@ -446,10 +449,11 @@ sub cycle_OD_turning_chamfer_parameters
 	;#1761 = 0.5 ;; retract amount
 	;#1762 = 3000 ;; max spindle speed
 	;#1763 = 0.05 ;; Finish amount face
+	#1772 = #5009 ;;Tool nose radius --> Get tool nose radius from tool table
 	
 	;; dialog with picture
 	
-	dlgmsg "dialog_OD_turning_chamfer" "Z1" 1750 "Z2" 1751 "diameter A" 1752 "diameter B" 1753 "chamfer angle" 1754 "chamfer length" 1755 "DOC" 1756 "finish amount" 1757 "finish amount face" 1763 "Vc [m/min]" 1758 "F [mm/rev]" 1759 "Z clearance" 1760 "retract amount" 1761 "max spindle speed" 1762
+	dlgmsg "dialog_OD_turning_chamfer" "Z1" 1750 "Z2" 1751 "diameter A" 1752 "diameter B" 1753 "chamfer angle" 1754 "chamfer length" 1755 "DOC" 1756 "finish amount" 1757 "finish amount face" 1763 "Vc [m/min]" 1758 "F [mm/rev]" 1759 "Z clearance" 1760 "retract amount" 1761 "max spindle speed" 1762 "tool nose radius" 1772
 	
 	if [#5398 == -1] ;; dialog canceled
 		M30
@@ -491,6 +495,13 @@ sub cycle_OD_turning_chamfer
 	;; multiply depth of cut and finish alowance by 2: diameter programming
 	#1756 = [2* #1756]
 	#1757 = [2* #1757]
+	
+	;; calculate tool radius offsets
+	#1773 = [#1772 * [1 - TAN[ [#1754/2] ] ] * TAN[#1754] ]	;;Xc radial compensation offset: =Rn*(1-tan(angle/2))*tan(angle)
+	#1774 = [#1773 / TAN[#1754] ]							;;Zc axial compensation offset = Xc/tan(angle)
+	
+	msg "Calculated diametral compensation Xc:"[2*#1773]
+	msg "Calculated axial compensation Zc:"#1774
 	
 	;; start cycle
 	;; goto safety position
@@ -552,7 +563,6 @@ sub cycle_OD_turning_chamfer
 			#1764 = 1 ;; roughing completed
 			;;msg "roughing passes completed"
 			
-		
 		endif
 		
 	endwhile
@@ -562,8 +572,18 @@ sub cycle_OD_turning_chamfer
 	msg "chamfer height:"#1768
 	#1769 = [ #1753 - 2 * #1768 ] ;; chamfer diameter
 	msg "chamfer diameter:"#1769
+
+	;; apply cutter radius offset compensation
+	#1768 = [#1768 + #1773]
+	#1769 = [#1769 - [2*#1773] ] ;; subtract calculated radial offset Xc, multiply by 2 for diameter
+	#1755 = [#1755 + #1774] ;; add calculated axial offset Zc
+	
+	msg "chamfer height compensated:"#1768
+	msg "chamfer diameter compensated:"#1769
+	
 	#1770 = [[#1756/2] / TAN[#1754]] ;; calculate Z-cutting depth reduction for chamfer roughing
 	msg "Z-reduction:"#1770
+	
 	
 	#1765 = [#1766 - #1756] ;; desired cutting diameter
 	#1771 = [#1750 - [#1755 - #1770]] ;; initial chamfer roughing cutting depth Z
@@ -694,7 +714,7 @@ sub cycle_drilling
 	G0 X0 Z[#1450 + #1455]
 	
 	;; start spindle
-	;; limit speed to 4000 RPM
+	;; limit speed to 3000 RPM
 	if [#1461 > 3000]
 		G97 S3000
 	else
@@ -775,11 +795,11 @@ sub cycle_external_threading_parameters
 	;; #1554 = 1.00 ;; Pitch
 	;; #1555 = 0.08 ;; depth per pass
 	;; #1556 = 800 ;; spindle speed [rev/min] | negative for left hand threads
-	;;
+	;; #1558 = 1	;; number of spring passes
 
 	;; dialog with picture
 	
-	dlgmsg "dialog_external_threading" "Z1" 1550 "Z2" 1551 "Nominal thread size" 1552 "pitch" 1554 "depth per pass" 1555 "spindle speed [rev/min]" 1556
+	dlgmsg "dialog_external_threading" "Z1" 1550 "Z2" 1551 "Nominal thread size" 1552 "pitch" 1554 "depth per pass" 1555 "spindle speed [rev/min]" 1556 "spring passes" 1558
 	
 	if [#5398 == -1] ;; dialog canceled
 		M30
@@ -919,7 +939,7 @@ sub cycle_external_threading
 	G0 X#1552 Z#1550
 
     ;; threading cycle (radial feed)
-    G76 P#1554 Z#1551 I#1552 J#1555 K#1557
+    G76 P#1554 Z#1551 I#1552 J#1555 K#1557 H#1558
 
     ;; end macro
 	M9 ;; stop cooling
@@ -1218,11 +1238,12 @@ sub cycle_internal_threading_parameters
 	;; #1705 = 0.08 ;; depth per pass
 	;; #1706 = 800 ;; spindle speed [rev/min] | negative for left hand threads
 	;; #1708 = 2 ;; Z clearance
+	;; #1709 = 1 ;; spring passes
 
 
 	;; dialog with picture
 	
-	dlgmsg "dialog_internal_threading" "Z1" 1700 "Z2" 1701 "Nominal thread size" 1702 "pitch" 1704 "depth per pass" 1705 "spindle speed [rev/min]" 1706 "Z clearance " 1708
+	dlgmsg "dialog_internal_threading" "Z1" 1700 "Z2" 1701 "Nominal thread size" 1702 "pitch" 1704 "depth per pass" 1705 "spindle speed [rev/min]" 1706 "Z clearance " 1708 "spring passes" 1709
 	
 	if [#5398 == -1] ;; dialog canceled
 		M30
@@ -1360,7 +1381,7 @@ Sub cycle_internal_threading
 	G0 X[#1703-#1704] Z#1700
 
     ;; threading cycle (radial feed)
-    G76 P#1704 Z#1701 I[#1702 - [2*#1707]] J#1705 K#1707
+    G76 P#1704 Z#1701 I[#1702 - [2*#1707]] J#1705 K#1707 H#1709
 	
 	G0 Z[#1700 + #1708]
 
@@ -1550,7 +1571,7 @@ endsub
 sub end_macro
 
 	M9 ;; stop cooling
-	M3 ;; --> M4 stopped spindle in position control, M3 free rotating --> need to fix in spindle drive setting
+	;;M3 ;; --> M4 stopped spindle in position control, M3 free rotating --> need to fix in spindle drive setting
 	M5 ;; stop spindle
 	G30 ;; go to safe position
 	M30 ;; end program
